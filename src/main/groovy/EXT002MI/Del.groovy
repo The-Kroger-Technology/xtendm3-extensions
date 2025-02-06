@@ -6,52 +6,55 @@
  *  @CHANGELOGS
  *  Version   Date(YMd8)    User        Description
  *  1.0.0     20241014      JTAPANG     Initial Release
+ *  1.0.1     20241112      ADY         Limit deletion to 10000 records per transaction
  */
  
 public class Del extends ExtendM3Transaction {
-  private final MIAPI mi
-  private final ProgramAPI program
-  private final DatabaseAPI database
+  private final MIAPI mi;
+  private final ProgramAPI program;
+  private final DatabaseAPI database;
   
-  int inCONO
-  String inWHLO, inITNO
+  int inCONO;
+  String inWHLO, inITNO;
   
   public Del(MIAPI mi, ProgramAPI program, DatabaseAPI database) {
-    this.mi = mi
-    this.program = program
-    this.database = database
+    this.mi = mi;
+    this.program = program;
+    this.database = database;
   }
   
   public void main() {
     // Initialize input fields
-    inCONO = mi.inData.get("CONO") == null ? 0 : mi.inData.get("CONO") as Integer
-    inWHLO = mi.inData.get("WHLO") == null ? "" : mi.inData.get("WHLO") as String
-    inITNO = mi.inData.get("ITNO") == null ? "" : mi.inData.get("ITNO") as String
+    inCONO = mi.inData.get("CONO") == null ? 0 : mi.inData.get("CONO") as Integer;
+    inWHLO = mi.inData.get("WHLO") == null ? "" : mi.inData.get("WHLO") as String;
+    inITNO = mi.inData.get("ITNO") == null ? "" : mi.inData.get("ITNO") as String;
     
     // Validate inputs
     if (!this.isValidInput()) {
-      return
+      return;
     }
     
     // Check if exists
-    DBAction queryMITSTA = database.table("MITSTA").index("00").build()
-    DBContainer conMITSTA = queryMITSTA.getContainer()
-    conMITSTA.set("MHCONO", inCONO)
-    conMITSTA.set("MHWHLO", inWHLO)
-    int nrOfKeys = 2
+    DBAction queryMITSTA = database.table("MITSTA").index("00").build();
+    DBContainer conMITSTA = queryMITSTA.getContainer();
+    conMITSTA.set("MHCONO", inCONO);
+    conMITSTA.set("MHWHLO", inWHLO);
+    int nrOfRecords = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 10000? 10000: mi.getMaxRecords();
+    int nrOfKeys = 2;
     if (!inITNO.isBlank()) {
-      conMITSTA.set("MHITNO", inITNO)
-      nrOfKeys++
+      conMITSTA.set("MHITNO", inITNO);
+      nrOfKeys++;
     }
     
-    Closure < ? > deleteCallback = {
-    LockedResult lockedResult ->
-    lockedResult.delete()
+    Closure<Boolean> deleteCallback = { DBContainer data ->  
+       DBAction action = database.table("MITSTA").index("00").build();
+       action.readLock(data, { LockedResult lockedResult ->
+        lockedResult.delete();
+       })
     }
     
-    if (!queryMITSTA.readAllLock(conMITSTA, nrOfKeys, deleteCallback)) 
-    {
-      mi.error("The record does not exist")
+    if (!queryMITSTA.readAll(conMITSTA, nrOfKeys, nrOfRecords, deleteCallback)) {
+      mi.error("The record does not exist");
     }
   }
   
