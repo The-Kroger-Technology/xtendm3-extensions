@@ -126,7 +126,7 @@ public class UpdEXTMUR extends ExtendM3Transaction {
   
   boolean isValidInput() {
     // Check MKCL
-    if (!inMKCL.isBlank()) {
+    if (!inMKCL.isBlank() && inMKCL != "?") {
       if (!this.checkMKCL()) {
         mi.error("Milk class ${inMKCL} does not exist");
         return false;
@@ -134,7 +134,7 @@ public class UpdEXTMUR extends ExtendM3Transaction {
     }
     
     // Check CMDT
-    if (!inCMDT.isBlank()) {
+    if (!inCMDT.isBlank() && inCMDT != "?") {
       if (!this.checkCSYTAB("CFI3", inCMDT)) {
         mi.error("Commodity ${inCMDT} does not exist");
         return false;
@@ -142,7 +142,7 @@ public class UpdEXTMUR extends ExtendM3Transaction {
     }
     
     // Check SCMD
-    if (!inSCMD.isBlank()) {
+    if (!inSCMD.isBlank() && inSCMD != "?") {
       if (!this.checkCSYTAB("CFI1", inSCMD)) {
         mi.error("Sub-commodity ${inSCMD} does not exist");
         return false;
@@ -150,7 +150,7 @@ public class UpdEXTMUR extends ExtendM3Transaction {
     }
     
     // Check UNMS
-    if (!inUNMS.isBlank()) {
+    if (!inUNMS.isBlank() && inUNMS != "?") {
       if (!this.checkCSYTAB("UNIT", inUNMS)) {
         mi.error("Basic unit of measure ${inUNMS} does not exist");
         return false;
