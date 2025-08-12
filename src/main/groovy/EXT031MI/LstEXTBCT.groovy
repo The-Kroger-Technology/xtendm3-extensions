@@ -42,7 +42,6 @@ public class LstEXTBCT extends ExtendM3Transaction {
     inCONO = mi.in.get("CONO") == null ? program.LDAZD.CONO as int : mi.in.get("CONO") as int;
     inDIVI = mi.inData.get("DIVI") == null ? "" : mi.inData.get("DIVI").trim();
     inWHLO = mi.inData.get("WHLO") == null ? "" : mi.inData.get("WHLO").trim();
-    //inBYID = mi.inData.get("BYID") == null ? "" : mi.inData.get("BYID").trim();
     
     DBAction query = database.table("EXTBCT").index("00").selectAllFields().build();
     DBContainer container = query.getContainer();
@@ -56,10 +55,7 @@ public class LstEXTBCT extends ExtendM3Transaction {
       container.set("EXWHLO", inWHLO);
       index++;
     }
-/*    if (!inBYID.isBlank()) {
-      container.set("EXBYID", inBYID);
-      index++;
-    }*/
+
     query.readAll(container, index, MAX_RECORDS, {
       DBContainer data ->
       puno = "";
