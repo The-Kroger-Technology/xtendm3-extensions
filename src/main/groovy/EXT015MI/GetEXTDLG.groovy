@@ -1,0 +1,128 @@
+/**
+ * @Name: GetEXTDLG.EXTDLG
+ * @Description: Get record on table EXTDL1 and EXTDL2
+ * @Authors:  Jonard Tapang
+ *
+ * @CHANGELOGS
+ *  Version   Date     User     Description
+ *  1.0.0     YYddMM   User     Initial Release - Generated from XtendM3 CRUD Generator
+ *
+ */
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+public class GetEXTDLG extends ExtendM3Transaction {
+  private final MIAPI mi;
+  private final UtilityAPI utility;
+  private final LoggerAPI logger;
+  private final ProgramAPI program;
+  private final MICallerAPI miCaller;
+  private final DatabaseAPI database;
+  private int inCONO, inDSEQ;
+  private String inDIVI;
+  private String inWHLO;
+  private String inLDID;
+  
+  public GetEXTDLG(MIAPI mi, UtilityAPI utility, LoggerAPI logger, ProgramAPI program, MICallerAPI miCaller, DatabaseAPI database) {
+    this.mi = mi;
+    this.utility = utility;
+    this.logger = logger;
+    this.program = program;
+    this.miCaller = miCaller;
+    this.database = database;
+  }
+  public void main() {
+    inCONO = mi.in.get("CONO") == null ? program.LDAZD.CONO as int : mi.in.get("CONO") as Integer;
+    inDIVI = mi.inData.get("DIVI") == null ? "" : mi.inData.get("DIVI").trim();
+    inWHLO = mi.inData.get("WHLO") == null ? "" : mi.inData.get("WHLO").trim();
+    inLDID = mi.inData.get("LDID") == null ? "" : mi.inData.get("LDID").trim();
+    inDSEQ = mi.in.get("DSEQ") == null ? 0 : mi.in.get("DSEQ") as Integer;
+
+    DBAction query = database.table("EXTDL1").index("00").selectAllFields().build();
+    DBContainer container = query.getContainer();
+    container.set("EXCONO", inCONO);
+    container.set("EXDIVI", inDIVI);
+    container.set("EXWHLO", inWHLO);
+    container.set("EXLDID", inLDID);
+    container.set("EXDSEQ", inDSEQ);
+    if (!query.read(container)) {
+      mi.error("Record does not exists in EXTDL1");
+      return;
+    }
+
+    DBAction query1 = database.table("EXTDL2").index("00").selectAllFields().build();
+    DBContainer container1 = query1.getContainer();
+    container1.set("EXCONO", inCONO);
+    container1.set("EXDIVI", inDIVI);
+    container1.set("EXWHLO", inWHLO);
+    container1.set("EXLDID", inLDID);
+    container1.set("EXDSEQ", inDSEQ);
+    
+    if (!query1.read(container1)) {
+      mi.error("Record does not exists in EXTDL2");
+      return;
+    }
+    
+    mi.outData.put("CONO", container.get("EXCONO").toString());
+    mi.outData.put("DIVI", container.get("EXDIVI").toString());
+    mi.outData.put("WHLO", container.get("EXWHLO").toString());
+    mi.outData.put("LDID", container.get("EXLDID").toString());
+    mi.outData.put("DSEQ", container.get("EXDSEQ").toString());
+    mi.outData.put("PDST", container.get("EXPDST").toString());
+    mi.outData.put("PRSD", container.get("EXPRSD").toString());
+    mi.outData.put("PRST", container.get("EXPRST").toString());
+    mi.outData.put("PRED", container.get("EXPRED").toString());
+    mi.outData.put("PRET", container.get("EXPRET").toString());
+    mi.outData.put("BODO", container.get("EXBODO").toString());
+    mi.outData.put("ENDT", container.get("EXENDT").toString());
+    mi.outData.put("ENTM", container.get("EXENTM").toString());
+    mi.outData.put("EODO", container.get("EXEODO").toString());
+    mi.outData.put("STDT", container.get("EXSTDT").toString());
+    mi.outData.put("STTM", container.get("EXSTTM").toString());
+    mi.outData.put("EVDT", container.get("EXEVDT").toString());
+    mi.outData.put("EVTM", container.get("EXEVTM").toString());
+    mi.outData.put("ACTD", container.get("EXACTD").toString());
+    mi.outData.put("ARDT", container.get("EXARDT").toString());
+    mi.outData.put("ARTM", container.get("EXARTM").toString());
+    mi.outData.put("NETW", container.get("EXNETW").toString());
+    mi.outData.put("NOWT", container.get("EXNOWT").toString());
+    mi.outData.put("DPDT", container.get("EXDPDT").toString());
+    mi.outData.put("DPTM", container.get("EXDPTM").toString());
+    mi.outData.put("DTEM", container.get("EXDTEM").toString());
+    mi.outData.put("DECL", container.get("EXDECL").toString());
+    mi.outData.put("DEID", container.get("EXDEID").toString());
+    mi.outData.put("DENM", container.get("EXDENM").toString());
+    mi.outData.put("DRMD", container.get("EXDRMD").toString());
+    mi.outData.put("SIRD", container.get("EXSIRD").toString());
+    mi.outData.put("STNO", container.get("EXSTNO").toString());
+    mi.outData.put("PRMD", container.get("EXPRMD").toString());
+    mi.outData.put("BNSC", container.get("EXBNSC").toString());
+    mi.outData.put("GALS", container.get("EXGALS").toString());
+    mi.outData.put("CDAT", container.get("EXCDAT").toString());
+    mi.outData.put("CTIM", container.get("EXCTIM").toString());
+    mi.outData.put("ACDT", container.get("EXACDT").toString());
+    mi.outData.put("ACTM", container.get("EXACTM").toString());
+    mi.outData.put("GFAD", container.get("EXGFAD").toString());
+    mi.outData.put("GFAT", container.get("EXGFAT").toString());
+    mi.outData.put("LTID", container.get("EXLTID").toString());
+    mi.outData.put("HAID", container.get("EXHAID").toString());
+    mi.outData.put("HANI", container.get("EXHANI").toString());
+    mi.outData.put("HANM", container1.get("EXHANM").toString());
+    mi.outData.put("TRID", container1.get("EXTRID").toString());
+    mi.outData.put("TRFN", container1.get("EXTRFN").toString());
+    mi.outData.put("TRLN", container1.get("EXTRLN").toString());
+    mi.outData.put("TRPN", container1.get("EXTRPN").toString());
+    mi.outData.put("TRSN", container1.get("EXTRSN").toString());
+    mi.outData.put("MLOC", container1.get("EXMLOC").toString());
+    mi.outData.put("PV01", container1.get("EXPV01").toString());
+    mi.outData.put("PV02", container1.get("EXPV02").toString());
+    mi.outData.put("PV03", container1.get("EXPV03").toString());
+    mi.outData.put("PV04", container1.get("EXPV04").toString());
+    mi.outData.put("PV05", container1.get("EXPV05").toString());
+    mi.outData.put("PV06", container1.get("EXPV06").toString());
+    mi.outData.put("PV07", container1.get("EXPV07").toString());
+    mi.outData.put("PV08", container1.get("EXPV08").toString());
+    mi.outData.put("PV09", container1.get("EXPV09").toString());
+    mi.outData.put("PV10", container1.get("EXPV10").toString());
+    mi.write();
+  }
+}
