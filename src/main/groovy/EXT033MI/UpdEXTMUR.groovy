@@ -4,8 +4,10 @@
  * @Authors: Ajian Dy
  *
  * @CHANGELOGS
- *  Version   Date     User     Description
- *  1.0.0     20250723 ADY      Initial Release
+ *  Version   Date      User    Description
+ *  1.0.0     20250723  ADY     Initial Release
+ *  1.0.1     20250814  ADY     Added inputs ANFQ, SNFQ
+ *  1.0.2     20250826  ADY     Added Javadoc comments, fixed variable names, set nbrOfKeys to 1
  *
  */
 
@@ -20,8 +22,8 @@ public class UpdEXTMUR extends ExtendM3Transaction {
   private final MICallerAPI miCaller;
   private final DatabaseAPI database;
 
-  private int inCONO, pageSize;
-  private String inDIVI, inWHLO, inDATE, inMFNO, inPRNO, inMKCL, inCMDT, inSCMD, inMFQT, inUNMS, inAMQT, inSMQT, inABQT, inSBQT, inAOMQ, inSOMQ, inAOBQ, inSOBQ;
+  private int inCONO;
+  private String inDIVI, inWHLO, inDATE, inMFNO, inPRNO, inMKCL, inCMDT, inSCMD, inMFQT, inUNMS, inAMQT, inSMQT, inABQT, inSBQT, inAOMQ, inSOMQ, inAOBQ, inSOBQ, inANFQ, inSNFQ;
 
   public UpdEXTMUR(MIAPI mi, UtilityAPI utility, LoggerAPI logger, ProgramAPI program, MICallerAPI miCaller, DatabaseAPI database) {
     this.mi = mi;
@@ -52,22 +54,23 @@ public class UpdEXTMUR extends ExtendM3Transaction {
     inSOMQ = mi.inData.get("SOMQ") == null ? "" : mi.inData.get("SOMQ").trim() as String;
     inAOBQ = mi.inData.get("AOBQ") == null ? "" : mi.inData.get("AOBQ").trim() as String;
     inSOBQ = mi.inData.get("SOBQ") == null ? "" : mi.inData.get("SOBQ").trim() as String;
-    pageSize = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 10000? 10000: mi.getMaxRecords();
+    inANFQ = mi.inData.get("ANFQ") == null ? "" : mi.inData.get("ANFQ").trim() as String;
+    inSNFQ = mi.inData.get("SNFQ") == null ? "" : mi.inData.get("SNFQ").trim() as String;
 
     if (!isValidInput()) {
       return;
     }
     
-    DBAction EXTMUR_query = database.table("EXTMUR").index("00").selectAllFields().build();
-    DBContainer EXTMUR = EXTMUR_query.getContainer();
-    EXTMUR.set("EXCONO", inCONO);
-    EXTMUR.set("EXDIVI", inDIVI);
-    EXTMUR.set("EXWHLO", inWHLO);
-    EXTMUR.set("EXDATE", inDATE as int);
-    EXTMUR.set("EXMFNO", inMFNO);
-    EXTMUR.set("EXPRNO", inPRNO);
+    DBAction queryEXTMUR = database.table("EXTMUR").index("00").selectAllFields().build();
+    DBContainer containerEXTMUR = queryEXTMUR.getContainer();
+    containerEXTMUR.set("EXCONO", inCONO);
+    containerEXTMUR.set("EXDIVI", inDIVI);
+    containerEXTMUR.set("EXWHLO", inWHLO);
+    containerEXTMUR.set("EXDATE", inDATE as int);
+    containerEXTMUR.set("EXMFNO", inMFNO);
+    containerEXTMUR.set("EXPRNO", inPRNO);
 
-    if (!EXTMUR_query.read(EXTMUR)) {
+    if (!queryEXTMUR.read(containerEXTMUR)) {
       mi.error("Record does not exist");
       return;
     }
@@ -76,7 +79,7 @@ public class UpdEXTMUR extends ExtendM3Transaction {
     int changedDate = dateTime.format(DateTimeFormatter.ofPattern("yyyyMMdd")).toInteger();
     int changedTime = dateTime.format(DateTimeFormatter.ofPattern("HHmmss")).toInteger();
 
-    EXTMUR_query.readLock(EXTMUR, { LockedResult lockedResult ->
+    queryEXTMUR.readLock(containerEXTMUR, { LockedResult lockedResult ->
       if (!inMKCL.isBlank()) {
         lockedResult.set("EXMKCL", inMKCL.equals("?") ? "" : inMKCL);
       }
@@ -116,6 +119,12 @@ public class UpdEXTMUR extends ExtendM3Transaction {
       if (!inSOBQ.isBlank()) {
         lockedResult.set("EXSOBQ", inSOBQ.equals("?") ? 0 : inSOBQ as double);
       }
+      if (!inANFQ.isBlank()) {
+        lockedResult.set("EXANFQ", inANFQ.equals("?") ? 0 : inANFQ as double);
+      }
+      if (!inSNFQ.isBlank()) {
+        lockedResult.set("EXSNFQ", inSNFQ.equals("?") ? 0 : inSNFQ as double);
+      }
       lockedResult.set("EXCHNO", lockedResult.getInt("EXCHNO") + 1);
       lockedResult.set("EXLMDT", changedDate);
       lockedResult.set("EXLMTM", changedTime);
@@ -124,6 +133,9 @@ public class UpdEXTMUR extends ExtendM3Transaction {
     });
   }
   
+  /**
+   * Validate input fields
+   */
   boolean isValidInput() {
     // Check MKCL
     if (!inMKCL.isBlank() && inMKCL != "?") {
@@ -164,13 +176,14 @@ public class UpdEXTMUR extends ExtendM3Transaction {
    * Validate MKCL from MATDAM
    */
   boolean checkMKCL() {
-    ExpressionFactory MATDAM_exp = database.getExpressionFactory("MATDAM");
-    MATDAM_exp = MATDAM_exp.eq("AKDEVA", inMKCL);
+    ExpressionFactory expMATDAM = database.getExpressionFactory("MATDAM");
+    expMATDAM = expMATDAM.eq("AKDEVA", inMKCL);
     
-    DBAction MATDAM_query = database.table("MATDAM").index("00").matching(MATDAM_exp).build();
-    DBContainer MATDAM = MATDAM_query.getContainer();
+    DBAction queryMATDAM = database.table("MATDAM").index("00").matching(expMATDAM).build();
+    DBContainer containerMATDAM = queryMATDAM.getContainer();
+    containerMATDAM.set("AKCONO", inCONO);
     
-    if (MATDAM_query.readAll(MATDAM, 0, pageSize, {}) <= 0) {
+    if (queryMATDAM.readAll(containerMATDAM, 1, 1, {}) <= 0) {
       return false;
     } else {
       return true;
@@ -180,16 +193,16 @@ public class UpdEXTMUR extends ExtendM3Transaction {
   /**
    * Validate from CSYTAB
    */
-  boolean checkCSYTAB(String STCO, String STKY) {
-    DBAction CSYTAB_query = database.table("CSYTAB").index("00").build();
-    DBContainer CSYTAB = CSYTAB_query.getContainer();
-    CSYTAB.set("CTCONO", inCONO);
-    CSYTAB.set("CTDIVI", "");
-    CSYTAB.set("CTSTCO", STCO);
-    CSYTAB.set("CTSTKY", STKY);
-    CSYTAB.set("CTLNCD", "");
+  boolean checkCSYTAB(String stco, String stky) {
+    DBAction queryCSYTAB = database.table("CSYTAB").index("00").build();
+    DBContainer containerCSYTAB = queryCSYTAB.getContainer();
+    containerCSYTAB.set("CTCONO", inCONO);
+    containerCSYTAB.set("CTDIVI", "");
+    containerCSYTAB.set("CTSTCO", stco);
+    containerCSYTAB.set("CTSTKY", stky);
+    containerCSYTAB.set("CTLNCD", "");
     
-    if (!CSYTAB_query.read(CSYTAB)) {
+    if (!queryCSYTAB.read(containerCSYTAB)) {
       return false;
     } else {
       return true;

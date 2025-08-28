@@ -4,8 +4,9 @@
  * @Authors: Ajian Dy
  *
  * @CHANGELOGS
- *  Version   Date     User     Description
- *  1.0.0     20250723 ADY      Initial Release
+ *  Version   Date      User    Description
+ *  1.0.0     20250723  ADY     Initial Release
+ *  1.0.1     20250826  ADY     Fixed variable names
  *
  */
 
@@ -37,21 +38,21 @@ public class DelEXTMUR extends ExtendM3Transaction {
     inMFNO = mi.inData.get("MFNO") == null ? "" : mi.inData.get("MFNO").trim() as String;
     inPRNO = mi.inData.get("PRNO") == null ? "" : mi.inData.get("PRNO").trim() as String;
     
-    DBAction EXTMUR_query = database.table("EXTMUR").index("00").build();
-    DBContainer EXTMUR = EXTMUR_query.getContainer();
-    EXTMUR.set("EXCONO", inCONO);
-    EXTMUR.set("EXDIVI", inDIVI);
-    EXTMUR.set("EXWHLO", inWHLO);
-    EXTMUR.set("EXDATE", inDATE as int);
-    EXTMUR.set("EXMFNO", inMFNO);
-    EXTMUR.set("EXPRNO", inPRNO);
+    DBAction queryEXTMUR = database.table("EXTMUR").index("00").build();
+    DBContainer containerEXTMUR = queryEXTMUR.getContainer();
+    containerEXTMUR.set("EXCONO", inCONO);
+    containerEXTMUR.set("EXDIVI", inDIVI);
+    containerEXTMUR.set("EXWHLO", inWHLO);
+    containerEXTMUR.set("EXDATE", inDATE as int);
+    containerEXTMUR.set("EXMFNO", inMFNO);
+    containerEXTMUR.set("EXPRNO", inPRNO);
     
-    if (!EXTMUR_query.read(EXTMUR)) {
+    if (!queryEXTMUR.read(containerEXTMUR)) {
       mi.error("Record does not exist");
       return;
     }
     
-    EXTMUR_query.readLock(EXTMUR, { LockedResult lockedResult ->
+    queryEXTMUR.readLock(containerEXTMUR, { LockedResult lockedResult ->
       lockedResult.delete();
     });
   }

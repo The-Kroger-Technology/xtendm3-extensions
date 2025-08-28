@@ -4,8 +4,10 @@
  * @Authors: Ajian Dy
  *
  * @CHANGELOGS
- *  Version   Date     User     Description
- *  1.0.0     20250723 ADY      Initial Release
+ *  Version   Date      User    Description
+ *  1.0.0     20250723  ADY     Initial Release
+ *  1.0.1     20250814  ADY     Added outputs ANFQ, SNFQ
+ *  1.0.2     20250826  ADY     Fixed variable names, set nbrOfKeys to 1
  *
  */
 
@@ -17,7 +19,7 @@ public class LstEXTMUR extends ExtendM3Transaction {
   private final MICallerAPI miCaller;
   private final DatabaseAPI database;
   
-  private int inCONO;
+  private int inCONO, pageSize;
   private String inDIVI, inWHLO, inDATE, inMFNO, inPRNO;
   
   public LstEXTMUR(MIAPI mi, UtilityAPI utility, LoggerAPI logger, ProgramAPI program, MICallerAPI miCaller, DatabaseAPI database) {
@@ -36,35 +38,36 @@ public class LstEXTMUR extends ExtendM3Transaction {
     inDATE = mi.inData.get("DATE") == null ? "" : mi.inData.get("DATE").trim() as String;
     inMFNO = mi.inData.get("MFNO") == null ? "" : mi.inData.get("MFNO").trim() as String;
     inPRNO = mi.inData.get("PRNO") == null ? "" : mi.inData.get("PRNO").trim() as String;
-    final int MAX_RECORDS = mi.getMaxRecords() == 0 ? 10000 : mi.getMaxRecords();
+    pageSize = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 10000? 10000: mi.getMaxRecords();
     
-    ExpressionFactory EXTMUR_exp = database.getExpressionFactory("EXTMUR");
-    EXTMUR_exp = EXTMUR_exp.eq("EXCONO", inCONO.toString());
+    ExpressionFactory exp = database.getExpressionFactory("EXTMUR");
+    exp = exp.eq("EXCONO", inCONO.toString());
     
     if (!inDIVI.isBlank()) {
-      EXTMUR_exp = EXTMUR_exp.and(EXTMUR_exp.eq("EXDIVI", inDIVI));
+      exp = exp.and(exp.eq("EXDIVI", inDIVI));
     }
     
     if (!inWHLO.isBlank()) {
-      EXTMUR_exp = EXTMUR_exp.and(EXTMUR_exp.eq("EXWHLO", inWHLO));
+      exp = exp.and(exp.eq("EXWHLO", inWHLO));
     }
     
     if (!inDATE.isBlank()) {
-      EXTMUR_exp = EXTMUR_exp.and(EXTMUR_exp.eq("EXDATE", inDATE));
+      exp = exp.and(exp.eq("EXDATE", inDATE));
     }
     
     if (!inMFNO.isBlank()) {
-      EXTMUR_exp = EXTMUR_exp.and(EXTMUR_exp.eq("EXMFNO", inMFNO));
+      exp = exp.and(exp.eq("EXMFNO", inMFNO));
     }
     
     if (!inPRNO.isBlank()) {
-      EXTMUR_exp = EXTMUR_exp.and(EXTMUR_exp.eq("EXPRNO", inPRNO));
+      exp = exp.and(exp.eq("EXPRNO", inPRNO));
     }
     
-    DBAction EXTMUR_query = database.table("EXTMUR").index("00").matching(EXTMUR_exp).selectAllFields().build();
-    DBContainer EXTMUR = EXTMUR_query.getContainer();
+    DBAction queryEXTMUR = database.table("EXTMUR").index("00").matching(exp).selectAllFields().build();
+    DBContainer containerEXTMUR = queryEXTMUR.getContainer();
+    containerEXTMUR.set("EXCONO", inCONO);
     
-    EXTMUR_query.readAll(EXTMUR, 0, MAX_RECORDS, { DBContainer data ->
+    queryEXTMUR.readAll(containerEXTMUR, 1, pageSize, { DBContainer data ->
       mi.outData.put("CONO", data.get("EXCONO").toString());
       mi.outData.put("DIVI", data.get("EXDIVI").toString());
       mi.outData.put("WHLO", data.get("EXWHLO").toString());
@@ -84,6 +87,8 @@ public class LstEXTMUR extends ExtendM3Transaction {
       mi.outData.put("SOMQ", data.get("EXSOMQ").toString());
       mi.outData.put("AOBQ", data.get("EXAOBQ").toString());
       mi.outData.put("SOBQ", data.get("EXSOBQ").toString());
+      mi.outData.put("ANFQ", data.get("EXANFQ").toString());
+      mi.outData.put("SNFQ", data.get("EXSNFQ").toString());
       mi.write();
     });
   }

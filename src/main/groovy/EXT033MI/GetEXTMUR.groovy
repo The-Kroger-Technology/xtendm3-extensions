@@ -4,8 +4,10 @@
  * @Authors: Ajian Dy
  *
  * @CHANGELOGS
- *  Version   Date     User     Description
- *  1.0.0     20250723 ADY      Initial Release
+ *  Version   Date      User    Description
+ *  1.0.0     20250723  ADY     Initial Release
+ *  1.0.1     20250814  ADY     Added outputs ANFQ, SNFQ
+ *  1.0.2     20250826  ADY     Fixed variable names
  *
  */
 
@@ -37,39 +39,41 @@ public class GetEXTMUR extends ExtendM3Transaction {
     inMFNO = mi.inData.get("MFNO") == null ? "" : mi.inData.get("MFNO").trim() as String;
     inPRNO = mi.inData.get("PRNO") == null ? "" : mi.inData.get("PRNO").trim() as String;
     
-    DBAction EXTMUR_query = database.table("EXTMUR").index("00").selectAllFields().build();
-    DBContainer EXTMUR = EXTMUR_query.getContainer();
-    EXTMUR.set("EXCONO", inCONO);
-    EXTMUR.set("EXDIVI", inDIVI);
-    EXTMUR.set("EXWHLO", inWHLO);
-    EXTMUR.set("EXDATE", inDATE as int);
-    EXTMUR.set("EXMFNO", inMFNO);
-    EXTMUR.set("EXPRNO", inPRNO);
+    DBAction queryEXTMUR = database.table("EXTMUR").index("00").selectAllFields().build();
+    DBContainer containerEXTMUR = queryEXTMUR.getContainer();
+    containerEXTMUR.set("EXCONO", inCONO);
+    containerEXTMUR.set("EXDIVI", inDIVI);
+    containerEXTMUR.set("EXWHLO", inWHLO);
+    containerEXTMUR.set("EXDATE", inDATE as int);
+    containerEXTMUR.set("EXMFNO", inMFNO);
+    containerEXTMUR.set("EXPRNO", inPRNO);
     
-    if (!EXTMUR_query.read(EXTMUR)) {
+    if (!queryEXTMUR.read(containerEXTMUR)) {
       mi.error("Record does not exist");
       return;
     }
     
-    mi.outData.put("CONO", EXTMUR.get("EXCONO").toString());
-    mi.outData.put("DIVI", EXTMUR.get("EXDIVI").toString());
-    mi.outData.put("WHLO", EXTMUR.get("EXWHLO").toString());
-    mi.outData.put("DATE", EXTMUR.get("EXDATE").toString());
-    mi.outData.put("MFNO", EXTMUR.get("EXMFNO").toString());
-    mi.outData.put("PRNO", EXTMUR.get("EXPRNO").toString());
-    mi.outData.put("MKCL", EXTMUR.get("EXMKCL").toString());
-    mi.outData.put("CMDT", EXTMUR.get("EXCMDT").toString());
-    mi.outData.put("SCMD", EXTMUR.get("EXSCMD").toString());
-    mi.outData.put("MFQT", EXTMUR.get("EXMFQT").toString());
-    mi.outData.put("UNMS", EXTMUR.get("EXUNMS").toString());
-    mi.outData.put("AMQT", EXTMUR.get("EXAMQT").toString());
-    mi.outData.put("SMQT", EXTMUR.get("EXSMQT").toString());
-    mi.outData.put("ABQT", EXTMUR.get("EXABQT").toString());
-    mi.outData.put("SBQT", EXTMUR.get("EXSBQT").toString());
-    mi.outData.put("AOMQ", EXTMUR.get("EXAOMQ").toString());
-    mi.outData.put("SOMQ", EXTMUR.get("EXSOMQ").toString());
-    mi.outData.put("AOBQ", EXTMUR.get("EXAOBQ").toString());
-    mi.outData.put("SOBQ", EXTMUR.get("EXSOBQ").toString());
+    mi.outData.put("CONO", containerEXTMUR.get("EXCONO").toString());
+    mi.outData.put("DIVI", containerEXTMUR.get("EXDIVI").toString());
+    mi.outData.put("WHLO", containerEXTMUR.get("EXWHLO").toString());
+    mi.outData.put("DATE", containerEXTMUR.get("EXDATE").toString());
+    mi.outData.put("MFNO", containerEXTMUR.get("EXMFNO").toString());
+    mi.outData.put("PRNO", containerEXTMUR.get("EXPRNO").toString());
+    mi.outData.put("MKCL", containerEXTMUR.get("EXMKCL").toString());
+    mi.outData.put("CMDT", containerEXTMUR.get("EXCMDT").toString());
+    mi.outData.put("SCMD", containerEXTMUR.get("EXSCMD").toString());
+    mi.outData.put("MFQT", containerEXTMUR.get("EXMFQT").toString());
+    mi.outData.put("UNMS", containerEXTMUR.get("EXUNMS").toString());
+    mi.outData.put("AMQT", containerEXTMUR.get("EXAMQT").toString());
+    mi.outData.put("SMQT", containerEXTMUR.get("EXSMQT").toString());
+    mi.outData.put("ABQT", containerEXTMUR.get("EXABQT").toString());
+    mi.outData.put("SBQT", containerEXTMUR.get("EXSBQT").toString());
+    mi.outData.put("AOMQ", containerEXTMUR.get("EXAOMQ").toString());
+    mi.outData.put("SOMQ", containerEXTMUR.get("EXSOMQ").toString());
+    mi.outData.put("AOBQ", containerEXTMUR.get("EXAOBQ").toString());
+    mi.outData.put("SOBQ", containerEXTMUR.get("EXSOBQ").toString());
+    mi.outData.put("ANFQ", containerEXTMUR.get("EXANFQ").toString());
+    mi.outData.put("SNFQ", containerEXTMUR.get("EXSNFQ").toString());
     mi.write();
   }
 }
