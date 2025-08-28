@@ -6,12 +6,13 @@
  * @CHANGELOGS
  *  Version   Date      User    Description
  *  1.0.0     20250324  ADY     Initial Release
+ *  1.0.1     20250826  ADY     Added Javadoc comments, fixed variable names, removed SimpleDateFormat
  *
  */
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 
 public class AddEXTRAW extends ExtendM3Transaction {
   private final MIAPI mi;
@@ -50,17 +51,17 @@ public class AddEXTRAW extends ExtendM3Transaction {
       return;
     }
     
-    DBAction EXTRAW_query = database.table("EXTRAW").index("00").build();
-    DBContainer EXTRAW = EXTRAW_query.getContainer();
-    EXTRAW.set("EXCONO", inCONO);
-    EXTRAW.set("EXFACI", inFACI);
-    EXTRAW.set("EXMTNO", inMTNO);
-    EXTRAW.set("EXITNO", inITNO);
-    EXTRAW.set("EXITCL", inITCL);
-    EXTRAW.set("EXFDAT", inFDAT);
-    EXTRAW.set("EXTDAT", inTDAT);
+    DBAction queryEXTRAW = database.table("EXTRAW").index("00").build();
+    DBContainer containerEXTRAW = queryEXTRAW.getContainer();
+    containerEXTRAW.set("EXCONO", inCONO);
+    containerEXTRAW.set("EXFACI", inFACI);
+    containerEXTRAW.set("EXMTNO", inMTNO);
+    containerEXTRAW.set("EXITNO", inITNO);
+    containerEXTRAW.set("EXITCL", inITCL);
+    containerEXTRAW.set("EXFDAT", inFDAT);
+    containerEXTRAW.set("EXTDAT", inTDAT);
 
-    if (EXTRAW_query.read(EXTRAW)) {
+    if (queryEXTRAW.read(containerEXTRAW)) {
       mi.error("Record already exists");
       return;
     }
@@ -75,21 +76,24 @@ public class AddEXTRAW extends ExtendM3Transaction {
     inLMDT = entryDate;
     inLMTM = entryTime;
 
-    EXTRAW.set("EXTRQT", inTRQT);
-    EXTRAW.set("EXTAMT", inTAMT);
-    EXTRAW.set("EXPCTG", inPCTG);
-    EXTRAW.set("EXFDAT", inFDAT);
-    EXTRAW.set("EXTDAT", inTDAT);
-    EXTRAW.set("EXCHID", inCHID);
-    EXTRAW.set("EXCHNO", inCHNO);
-    EXTRAW.set("EXRGDT", inRGDT);
-    EXTRAW.set("EXRGTM", inRGTM);
-    EXTRAW.set("EXLMDT", inLMDT);
-    EXTRAW.set("EXLMTM", inLMTM);
+    containerEXTRAW.set("EXTRQT", inTRQT);
+    containerEXTRAW.set("EXTAMT", inTAMT);
+    containerEXTRAW.set("EXPCTG", inPCTG);
+    containerEXTRAW.set("EXFDAT", inFDAT);
+    containerEXTRAW.set("EXTDAT", inTDAT);
+    containerEXTRAW.set("EXCHID", inCHID);
+    containerEXTRAW.set("EXCHNO", inCHNO);
+    containerEXTRAW.set("EXRGDT", inRGDT);
+    containerEXTRAW.set("EXRGTM", inRGTM);
+    containerEXTRAW.set("EXLMDT", inLMDT);
+    containerEXTRAW.set("EXLMTM", inLMTM);
 
-    EXTRAW_query.insert(EXTRAW);
+    queryEXTRAW.insert(containerEXTRAW);
   }
 
+  /**
+   * Validate input fields
+   */
   boolean isValidInput() {
     // Check FDAT
     if (inFDAT != 0) {
@@ -109,21 +113,11 @@ public class AddEXTRAW extends ExtendM3Transaction {
     
     // Check FDAT and TDAT
     if (inFDAT != 0 && inTDAT != 0) {
-      String strFDAT = inFDAT.toString();
-      String strTDAT = inTDAT.toString()
-      String dtFormat = "yyyyMMdd";
-      
-      SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dtFormat);
-      Date dfFDAT = simpleDateFormat.parse(strFDAT);
-      Date dfTDAT = simpleDateFormat.parse(strTDAT);
+      LocalDate ldFDAT = LocalDate.parse(inFDAT.toString(), DateTimeFormatter.ofPattern("yyyyMMdd"));
+      LocalDate ldTDAT = LocalDate.parse(inTDAT.toString(), DateTimeFormatter.ofPattern("yyyyMMdd"));
     
-      if(dfFDAT.after(dfTDAT)) {
+      if(ldFDAT.isAfter(ldTDAT)) {
         mi.error("From date is greater than To date");
-        return false;
-      }
-      
-      if(dfTDAT.before(dfFDAT)) {
-        mi.error("To date is less than From date");
         return false;
       }
     }
@@ -167,12 +161,12 @@ public class AddEXTRAW extends ExtendM3Transaction {
    * Validate FACI from CFACIL
    */
   boolean checkFACI() {
-    DBAction CFACIL_query = database.table("CFACIL").index("00").build();
-    DBContainer CFACIL = CFACIL_query.getContainer();
-    CFACIL.set("CFCONO", inCONO);
-    CFACIL.set("CFFACI", inFACI);
+    DBAction queryCFACIL = database.table("CFACIL").index("00").build();
+    DBContainer containerCFACIL = queryCFACIL.getContainer();
+    containerCFACIL.set("CFCONO", inCONO);
+    containerCFACIL.set("CFFACI", inFACI);
   
-    if (!CFACIL_query.read(CFACIL)) {
+    if (!queryCFACIL.read(containerCFACIL)) {
       return false;
     } else {
       return true;
@@ -182,13 +176,13 @@ public class AddEXTRAW extends ExtendM3Transaction {
   /**
    * Validate ITNO from MITMAS
    */
-  boolean checkITNO(String ITNO) {
-    DBAction MITMAS_query = database.table("MITMAS").index("00").build();
-    DBContainer MITMAS = MITMAS_query.getContainer();
-    MITMAS.set("MMCONO", inCONO);
-    MITMAS.set("MMITNO", ITNO);
+  boolean checkITNO(String itno) {
+    DBAction queryMITMAS = database.table("MITMAS").index("00").build();
+    DBContainer containerMITMAS = queryMITMAS.getContainer();
+    containerMITMAS.set("MMCONO", inCONO);
+    containerMITMAS.set("MMITNO", itno);
   
-    if (!MITMAS_query.read(MITMAS)) {
+    if (!queryMITMAS.read(containerMITMAS)) {
       return false;
     } else {
       return true;
@@ -199,19 +193,18 @@ public class AddEXTRAW extends ExtendM3Transaction {
    * Validate ITCL from CSYTAB
    */
   boolean checkITCL() {
-    DBAction CSYTAB_query = database.table("CSYTAB").index("00").build();
-    DBContainer CSYTAB = CSYTAB_query.getContainer();
-    CSYTAB.set("CTCONO", inCONO);
-    CSYTAB.set("CTDIVI", "");
-    CSYTAB.set("CTSTCO", "ITCL");
-    CSYTAB.set("CTSTKY", inITCL);
-    CSYTAB.set("CTLNCD", "");
+    DBAction queryCSYTAB = database.table("CSYTAB").index("00").build();
+    DBContainer containerCSYTAB = queryCSYTAB.getContainer();
+    containerCSYTAB.set("CTCONO", inCONO);
+    containerCSYTAB.set("CTDIVI", "");
+    containerCSYTAB.set("CTSTCO", "ITCL");
+    containerCSYTAB.set("CTSTKY", inITCL);
+    containerCSYTAB.set("CTLNCD", "");
     
-    if (!CSYTAB_query.read(CSYTAB)) {
+    if (!queryCSYTAB.read(containerCSYTAB)) {
       return false;
     } else {
       return true;
     }
   }
-
 }

@@ -6,6 +6,7 @@
  * @CHANGELOGS
  *  Version   Date      User    Description
  *  1.0.0     20250325  ADY     Initial Release
+ *  1.0.1     20250826  ADY     Fixed variable names
  *
  */
 
@@ -38,27 +39,27 @@ public class GetEXTRAW extends ExtendM3Transaction {
     inFDAT = mi.inData.get("FDAT") == null ? "" : mi.inData.get("FDAT").trim() as String;
     inTDAT = mi.inData.get("TDAT") == null ? "" : mi.inData.get("TDAT").trim() as String;
     
-    DBAction EXTRAW_query = database.table("EXTRAW").index("00").selectAllFields().build();
-    DBContainer EXTRAW = EXTRAW_query.getContainer();
-    EXTRAW.set("EXCONO", inCONO);
-    EXTRAW.set("EXFACI", inFACI);
-    EXTRAW.set("EXMTNO", inMTNO);
-    EXTRAW.set("EXITNO", inITNO);
-    EXTRAW.set("EXITCL", inITCL);
-    EXTRAW.set("EXFDAT", inFDAT as int);
-    EXTRAW.set("EXTDAT", inTDAT as int);
+    DBAction queryEXTRAW = database.table("EXTRAW").index("00").selectAllFields().build();
+    DBContainer containerEXTRAW = queryEXTRAW.getContainer();
+    containerEXTRAW.set("EXCONO", inCONO);
+    containerEXTRAW.set("EXFACI", inFACI);
+    containerEXTRAW.set("EXMTNO", inMTNO);
+    containerEXTRAW.set("EXITNO", inITNO);
+    containerEXTRAW.set("EXITCL", inITCL);
+    containerEXTRAW.set("EXFDAT", inFDAT as int);
+    containerEXTRAW.set("EXTDAT", inTDAT as int);
     
-    if (EXTRAW_query.read(EXTRAW)) {
-      mi.outData.put("CONO", EXTRAW.get("EXCONO").toString());
-      mi.outData.put("FACI", EXTRAW.get("EXFACI").toString());
-      mi.outData.put("MTNO", EXTRAW.get("EXMTNO").toString());
-      mi.outData.put("ITNO", EXTRAW.get("EXITNO").toString());
-      mi.outData.put("ITCL", EXTRAW.get("EXITCL").toString());
-      mi.outData.put("FDAT", EXTRAW.get("EXFDAT").toString());
-      mi.outData.put("TDAT", EXTRAW.get("EXTDAT").toString());
-      mi.outData.put("TRQT", EXTRAW.get("EXTRQT").toString());
-      mi.outData.put("TAMT", EXTRAW.get("EXTAMT").toString());
-      mi.outData.put("PCTG", EXTRAW.get("EXPCTG").toString());
+    if (queryEXTRAW.read(containerEXTRAW)) {
+      mi.outData.put("CONO", containerEXTRAW.get("EXCONO").toString());
+      mi.outData.put("FACI", containerEXTRAW.get("EXFACI").toString());
+      mi.outData.put("MTNO", containerEXTRAW.get("EXMTNO").toString());
+      mi.outData.put("ITNO", containerEXTRAW.get("EXITNO").toString());
+      mi.outData.put("ITCL", containerEXTRAW.get("EXITCL").toString());
+      mi.outData.put("FDAT", containerEXTRAW.get("EXFDAT").toString());
+      mi.outData.put("TDAT", containerEXTRAW.get("EXTDAT").toString());
+      mi.outData.put("TRQT", containerEXTRAW.get("EXTRQT").toString());
+      mi.outData.put("TAMT", containerEXTRAW.get("EXTAMT").toString());
+      mi.outData.put("PCTG", containerEXTRAW.get("EXPCTG").toString());
       mi.write();
     } else {
       mi.error("Record does not exist");

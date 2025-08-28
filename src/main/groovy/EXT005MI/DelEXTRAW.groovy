@@ -6,6 +6,7 @@
  * @CHANGELOGS
  *  Version   Date      User    Description
  *  1.0.0     20250325  ADY     Initial Release
+ *  1.0.1     20250826  ADY     Fixed variable names
  *
  */
 
@@ -38,22 +39,22 @@ public class DelEXTRAW extends ExtendM3Transaction {
     inFDAT = mi.inData.get("FDAT") == null ? "" : mi.inData.get("FDAT").trim() as String;
     inTDAT = mi.inData.get("TDAT") == null ? "" : mi.inData.get("TDAT").trim() as String;
     
-    DBAction EXTRAW_query = database.table("EXTRAW").index("00").build();
-    DBContainer EXTRAW = EXTRAW_query.getContainer();
-    EXTRAW.set("EXCONO", inCONO);
-    EXTRAW.set("EXFACI", inFACI);
-    EXTRAW.set("EXMTNO", inMTNO);
-    EXTRAW.set("EXITNO", inITNO);
-    EXTRAW.set("EXITCL", inITCL);
-    EXTRAW.set("EXFDAT", inFDAT as int);
-    EXTRAW.set("EXTDAT", inTDAT as int);
+    DBAction queryEXTRAW = database.table("EXTRAW").index("00").build();
+    DBContainer containerEXTRAW = queryEXTRAW.getContainer();
+    containerEXTRAW.set("EXCONO", inCONO);
+    containerEXTRAW.set("EXFACI", inFACI);
+    containerEXTRAW.set("EXMTNO", inMTNO);
+    containerEXTRAW.set("EXITNO", inITNO);
+    containerEXTRAW.set("EXITCL", inITCL);
+    containerEXTRAW.set("EXFDAT", inFDAT as int);
+    containerEXTRAW.set("EXTDAT", inTDAT as int);
     
-    if (!EXTRAW_query.read(EXTRAW)) {
+    if (!queryEXTRAW.read(containerEXTRAW)) {
       mi.error("Record does not exist");
       return;
     }
     
-    EXTRAW_query.readLock(EXTRAW, { LockedResult lockedResult ->
+    queryEXTRAW.readLock(containerEXTRAW, { LockedResult lockedResult ->
       lockedResult.delete();
     });
   }

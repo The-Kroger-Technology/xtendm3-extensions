@@ -6,6 +6,7 @@
  * @CHANGELOGS
  *  Version   Date      User    Description
  *  1.0.0     20250415  ADY     Initial Release
+ *  1.0.1     20250826  ADY     Added Javadoc comments, fixed variable names, set nbrOfKeys to 1
  *
  */
 
@@ -50,13 +51,14 @@ public class DelByDate extends ExtendM3Transaction {
       exp = exp.and(exp.le("EXTDAT", inTDAT)); 
     }
     
-    DBAction EXTRAW_query = database.table("EXTRAW")
+    DBAction queryEXTRAW = database.table("EXTRAW")
         .index("00")
         .matching(exp)
         .selection()
         .build();
 
-    DBContainer EXTRAW = EXTRAW_query.getContainer();
+    DBContainer containerEXTRAW = queryEXTRAW.getContainer();
+    containerEXTRAW.set("EXCONO", inCONO);
     
     Closure<?> resultHandlerEXTRAW = { DBContainer data ->
       DBAction action = database.table("EXTRAW").index("00").build();
@@ -65,12 +67,15 @@ public class DelByDate extends ExtendM3Transaction {
       });
     }
     
-    if (EXTRAW_query.readAll(EXTRAW, 0, pageSize, resultHandlerEXTRAW) <= 0) {
+    if (queryEXTRAW.readAll(containerEXTRAW, 1, pageSize, resultHandlerEXTRAW) <= 0) {
       mi.error("No valid record found - EXTRAW");
       return;
     }
   }
   
+  /**
+   * Validate input fields
+   */
   boolean isValidInput() {
     if (inFDAT.isBlank() && inTDAT.isBlank()) {
       mi.error("At least one field - either FDAT or TDAT - is required.");
