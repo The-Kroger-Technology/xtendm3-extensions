@@ -4,8 +4,9 @@
  * @Authors: Ajian Dy
  *
  * @CHANGELOGS
- *  Version   Date     User     Description
- *  1.0.0     20250604 ADY      Initial Release
+ *  Version   Date      User    Description
+ *  1.0.0     20250604  ADY     Initial Release
+ *  1.0.1     20250826  ADY     Added Javadoc comments, fixed variable names, removed query for SDST
  *
  */
 
@@ -43,14 +44,14 @@ public class AddEXTSGD extends ExtendM3Transaction {
       return;
     }
     
-    DBAction EXTSGD_query = database.table("EXTSGD").index("00").build();
-    DBContainer EXTSGD = EXTSGD_query.getContainer();
-    EXTSGD.set("EXCONO", inCONO);
-    EXTSGD.set("EXSDST", inSDST);
-    EXTSGD.set("EXSTRG", inSTRG);
-    EXTSGD.set("EXCUNO", inCUNO);
+    DBAction queryEXTSGD = database.table("EXTSGD").index("00").build();
+    DBContainer containerEXTSGD = queryEXTSGD.getContainer();
+    containerEXTSGD.set("EXCONO", inCONO);
+    containerEXTSGD.set("EXSDST", inSDST);
+    containerEXTSGD.set("EXSTRG", inSTRG);
+    containerEXTSGD.set("EXCUNO", inCUNO);
     
-    if (EXTSGD_query.read(EXTSGD)) {
+    if (queryEXTSGD.read(containerEXTSGD)) {
       mi.error("Record already exists");
       return;
     }
@@ -65,16 +66,19 @@ public class AddEXTSGD extends ExtendM3Transaction {
     inLMDT = entryDate;
     inLMTM = entryTime;
 
-    EXTSGD.set("EXCHID", inCHID);
-    EXTSGD.set("EXCHNO", inCHNO);
-    EXTSGD.set("EXRGDT", inRGDT);
-    EXTSGD.set("EXRGTM", inRGTM);
-    EXTSGD.set("EXLMDT", inLMDT);
-    EXTSGD.set("EXLMTM", inLMTM);
+    containerEXTSGD.set("EXCHID", inCHID);
+    containerEXTSGD.set("EXCHNO", inCHNO);
+    containerEXTSGD.set("EXRGDT", inRGDT);
+    containerEXTSGD.set("EXRGTM", inRGTM);
+    containerEXTSGD.set("EXLMDT", inLMDT);
+    containerEXTSGD.set("EXLMTM", inLMTM);
 
-    EXTSGD_query.insert(EXTSGD);
+    queryEXTSGD.insert(containerEXTSGD);
   }
 
+  /**
+   * Validate input fields
+   */
   boolean isValidInput() {
     // Check SDST
     if (!inSDST.isBlank()) {
@@ -98,15 +102,15 @@ public class AddEXTSGD extends ExtendM3Transaction {
    * Validate SDST from CSYTAB
    */
   boolean checkSDST() {
-    DBAction CSYTAB_query = database.table("CSYTAB").index("00").build();
-    DBContainer CSYTAB = CSYTAB_query.getContainer();
-    CSYTAB.set("CTCONO", inCONO);
-    CSYTAB.set("CTDIVI", "");
-    CSYTAB.set("CTSTCO", "SDST");
-    CSYTAB.set("CTSTKY", inSDST);
-    CSYTAB.set("CTLNCD", "");
+    DBAction queryCSYTAB = database.table("CSYTAB").index("00").build();
+    DBContainer containerCSYTAB = queryCSYTAB.getContainer();
+    containerCSYTAB.set("CTCONO", inCONO);
+    containerCSYTAB.set("CTDIVI", "");
+    containerCSYTAB.set("CTSTCO", "SDST");
+    containerCSYTAB.set("CTSTKY", inSDST);
+    containerCSYTAB.set("CTLNCD", "");
     
-    if (!CSYTAB_query.read(CSYTAB)) {
+    if (!queryCSYTAB.read(containerCSYTAB)) {
       return false;
     } else {
       return true;
@@ -117,25 +121,21 @@ public class AddEXTSGD extends ExtendM3Transaction {
    * Validate CUNO from OCUSMA
    */
   boolean checkCUNO() {
-    DBAction OCUSMA_query = database.table("OCUSMA").index("00").build();
-    DBContainer OCUSMA = OCUSMA_query.getContainer();
-    OCUSMA.set("OKCONO", inCONO);
-    OCUSMA.set("OKCUNO", inCUNO);
+    DBAction queryOCUSMA = database.table("OCUSMA").index("00").selection("OKSDST").build();
+    DBContainer containerOCUSMA = queryOCUSMA.getContainer();
+    containerOCUSMA.set("OKCONO", inCONO);
+    containerOCUSMA.set("OKCUNO", inCUNO);
   
-    if (!OCUSMA_query.read(OCUSMA)) {
+    if (!queryOCUSMA.read(containerOCUSMA)) {
       mi.error("Customer ${inCUNO} does not exist");
       return false;
     } else {
       if (!inSDST.isBlank()) {
-        ExpressionFactory OCUSMA_exp = database.getExpressionFactory("OCUSMA");
-        OCUSMA_exp = OCUSMA_exp.eq("SDST", inSDST);
-        OCUSMA_query = database.table("OCUSMA").index("00").matching(OCUSMA_exp).build();
-      
-        if (!OCUSMA_query.read(OCUSMA)) {
+        if (inSDST != containerOCUSMA.get("OKSDST").toString()) {
           mi.error("Customer ${inCUNO} does not belong to District ${inSDST}");
           return false;
         } else {
-          return true; 
+          return true;
         }
       } else {
         return true;

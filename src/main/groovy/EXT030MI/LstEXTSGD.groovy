@@ -4,8 +4,9 @@
  * @Authors: Ajian Dy
  *
  * @CHANGELOGS
- *  Version   Date     User     Description
- *  1.0.0     20250604 ADY      Initial Release
+ *  Version   Date      User    Description
+ *  1.0.0     20250604  ADY     Initial Release
+ *  1.0.1     20250826  ADY     Fixed variable names, set nbrOfKeys to 1
  *
  */
 
@@ -17,7 +18,7 @@ public class LstEXTSGD extends ExtendM3Transaction {
   private final MICallerAPI miCaller;
   private final DatabaseAPI database;
   
-  private int inCONO;
+  private int inCONO, pageSize;
   private String inSDST, inSTRG, inCUNO;
   
   public LstEXTSGD(MIAPI mi, UtilityAPI utility, LoggerAPI logger, ProgramAPI program, MICallerAPI miCaller, DatabaseAPI database) {
@@ -34,27 +35,28 @@ public class LstEXTSGD extends ExtendM3Transaction {
     inSDST = mi.inData.get("SDST") == null ? "" : mi.inData.get("SDST").trim() as String;
     inSTRG = mi.inData.get("STRG") == null ? "" : mi.inData.get("STRG").trim() as String;
     inCUNO = mi.inData.get("CUNO") == null ? "" : mi.inData.get("CUNO").trim() as String;
-    final int MAX_RECORDS = mi.getMaxRecords() == 0 ? 10000 : mi.getMaxRecords();
+    pageSize = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 10000? 10000: mi.getMaxRecords();
     
-    ExpressionFactory EXTSGD_exp = database.getExpressionFactory("EXTSGD");
-    EXTSGD_exp = EXTSGD_exp.eq("EXCONO", inCONO.toString());
+    ExpressionFactory exp = database.getExpressionFactory("EXTSGD");
+    exp = exp.eq("EXCONO", inCONO.toString());
     
     if (!inSDST.isBlank()) {
-      EXTSGD_exp = EXTSGD_exp.and(EXTSGD_exp.eq("EXSDST", inSDST));
+      exp = exp.and(exp.eq("EXSDST", inSDST));
     }
     
     if (!inSTRG.isBlank()) {
-      EXTSGD_exp = EXTSGD_exp.and(EXTSGD_exp.eq("EXSTRG", inSTRG));
+      exp = exp.and(exp.eq("EXSTRG", inSTRG));
     }
     
     if (!inCUNO.isBlank()) {
-      EXTSGD_exp = EXTSGD_exp.and(EXTSGD_exp.eq("EXCUNO", inCUNO));
+      exp = exp.and(exp.eq("EXCUNO", inCUNO));
     }
     
-    DBAction EXTSGD_query = database.table("EXTSGD").index("00").matching(EXTSGD_exp).selectAllFields().build();
-    DBContainer EXTSGD = EXTSGD_query.getContainer();
+    DBAction queryEXTSGD = database.table("EXTSGD").index("00").matching(exp).selectAllFields().build();
+    DBContainer containerEXTSGD = queryEXTSGD.getContainer();
+    containerEXTSGD.set("EXCONO", inCONO);
     
-    EXTSGD_query.readAll(EXTSGD, 0, MAX_RECORDS, { DBContainer data ->
+    queryEXTSGD.readAll(containerEXTSGD, 1, pageSize, { DBContainer data ->
       mi.outData.put("CONO", data.get("EXCONO").toString());
       mi.outData.put("SDST", data.get("EXSDST").toString());
       mi.outData.put("STRG", data.get("EXSTRG").toString());

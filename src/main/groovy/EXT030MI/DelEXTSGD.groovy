@@ -4,8 +4,9 @@
  * @Authors: Ajian Dy
  *
  * @CHANGELOGS
- *  Version   Date     User     Description
- *  1.0.0     20250604 ADY      Initial Release
+ *  Version   Date      User    Description
+ *  1.0.0     20250604  ADY     Initial Release
+ *  1.0.1     20250826  ADY     Fixed variable names
  *
  */
 
@@ -35,19 +36,19 @@ public class DelEXTSGD extends ExtendM3Transaction {
     inSTRG = mi.inData.get("STRG") == null ? "" : mi.inData.get("STRG").trim() as String;
     inCUNO = mi.inData.get("CUNO") == null ? "" : mi.inData.get("CUNO").trim() as String;
     
-    DBAction EXTSGD_query = database.table("EXTSGD").index("00").build();
-    DBContainer EXTSGD = EXTSGD_query.getContainer();
-    EXTSGD.set("EXCONO", inCONO);
-    EXTSGD.set("EXSDST", inSDST);
-    EXTSGD.set("EXSTRG", inSTRG);
-    EXTSGD.set("EXCUNO", inCUNO);
+    DBAction queryEXTSGD = database.table("EXTSGD").index("00").build();
+    DBContainer containerEXTSGD = queryEXTSGD.getContainer();
+    containerEXTSGD.set("EXCONO", inCONO);
+    containerEXTSGD.set("EXSDST", inSDST);
+    containerEXTSGD.set("EXSTRG", inSTRG);
+    containerEXTSGD.set("EXCUNO", inCUNO);
     
-    if (!EXTSGD_query.read(EXTSGD)) {
+    if (!queryEXTSGD.read(containerEXTSGD)) {
       mi.error("Record does not exist");
       return;
     }
     
-    EXTSGD_query.readLock(EXTSGD, { LockedResult lockedResult ->
+    queryEXTSGD.readLock(containerEXTSGD, { LockedResult lockedResult ->
       lockedResult.delete();
     });
   }
