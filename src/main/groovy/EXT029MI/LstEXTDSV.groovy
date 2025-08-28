@@ -4,8 +4,9 @@
  * @Authors: Ajian Dy
  *
  * @CHANGELOGS
- *  Version   Date     User     Description
- *  1.0.0     20250604 ADY      Initial Release
+ *  Version   Date      User    Description
+ *  1.0.0     20250604  ADY     Initial Release
+ *  1.0.1     20250826  ADY     Fixed variable names, set nbrOfKeys to 1
  *
  */
 
@@ -17,7 +18,7 @@ public class LstEXTDSV extends ExtendM3Transaction {
   private final MICallerAPI miCaller;
   private final DatabaseAPI database;
   
-  private int inCONO;
+  private int inCONO, pageSize;
   private String inCUDT, inFACI, inSDST, inCUNO, inITNO;
 
   public LstEXTDSV(MIAPI mi, UtilityAPI utility, LoggerAPI logger, ProgramAPI program, MICallerAPI miCaller, DatabaseAPI database) {
@@ -36,35 +37,36 @@ public class LstEXTDSV extends ExtendM3Transaction {
     inSDST = mi.inData.get("SDST") == null ? "" : mi.inData.get("SDST").trim() as String;
     inCUNO = mi.inData.get("CUNO") == null ? "" : mi.inData.get("CUNO").trim() as String;
     inITNO = mi.inData.get("ITNO") == null ? "" : mi.inData.get("ITNO").trim() as String;
-    final int MAX_RECORDS = mi.getMaxRecords() == 0 ? 10000 : mi.getMaxRecords();
+    pageSize = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 10000? 10000: mi.getMaxRecords();
     
-    ExpressionFactory EXTDSV_exp = database.getExpressionFactory("EXTDSV");
-    EXTDSV_exp = EXTDSV_exp.eq("EXCONO", inCONO.toString());
+    ExpressionFactory exp = database.getExpressionFactory("EXTDSV");
+    exp = exp.eq("EXCONO", inCONO.toString());
     
     if (!inCUDT.isBlank()) {
-      EXTDSV_exp = EXTDSV_exp.and(EXTDSV_exp.eq("EXCUDT", inCUDT));
+      exp = exp.and(exp.eq("EXCUDT", inCUDT));
     }
     
     if (!inFACI.isBlank()) {
-      EXTDSV_exp = EXTDSV_exp.and(EXTDSV_exp.eq("EXFACI", inFACI));
+      exp = exp.and(exp.eq("EXFACI", inFACI));
     }
     
     if (!inSDST.isBlank()) {
-      EXTDSV_exp = EXTDSV_exp.and(EXTDSV_exp.eq("EXSDST", inSDST));
+      exp = exp.and(exp.eq("EXSDST", inSDST));
     }
     
     if (!inCUNO.isBlank()) {
-      EXTDSV_exp = EXTDSV_exp.and(EXTDSV_exp.eq("EXCUNO", inCUNO));
+      exp = exp.and(exp.eq("EXCUNO", inCUNO));
     }
     
     if (!inITNO.isBlank()) {
-      EXTDSV_exp = EXTDSV_exp.and(EXTDSV_exp.eq("EXITNO", inITNO));
+      exp = exp.and(exp.eq("EXITNO", inITNO));
     }
     
-    DBAction EXTDSV_query = database.table("EXTDSV").index("00").matching(EXTDSV_exp).selectAllFields().build();
-    DBContainer EXTDSV = EXTDSV_query.getContainer();
+    DBAction queryEXTDSV = database.table("EXTDSV").index("00").matching(exp).selectAllFields().build();
+    DBContainer containerEXTDSV = queryEXTDSV.getContainer();
+    containerEXTDSV.set("EXCONO", inCONO);
     
-    EXTDSV_query.readAll(EXTDSV, 0, MAX_RECORDS, { DBContainer data ->
+    queryEXTDSV.readAll(containerEXTDSV, 1, pageSize, { DBContainer data ->
       mi.outData.put("CONO", data.get("EXCONO").toString());
       mi.outData.put("CUDT", data.get("EXCUDT").toString());
       mi.outData.put("FACI", data.get("EXFACI").toString());

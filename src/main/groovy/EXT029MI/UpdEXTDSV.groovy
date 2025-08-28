@@ -4,8 +4,9 @@
  * @Authors: Ajian Dy
  *
  * @CHANGELOGS
- *  Version   Date     User     Description
- *  1.0.0     20250604 ADY      Initial Release
+ *  Version   Date      User    Description
+ *  1.0.0     20250604  ADY     Initial Release
+ *  1.0.1     20250826  ADY     Fixed variable names
  *
  */
 
@@ -41,16 +42,16 @@ public class UpdEXTDSV extends ExtendM3Transaction {
     inITNO = mi.inData.get("ITNO") == null ? "" : mi.inData.get("ITNO").trim() as String;
     inORQT = mi.inData.get("ORQT") == null ? "" : mi.inData.get("ORQT").trim() as String;
 
-    DBAction EXTDSV_query = database.table("EXTDSV").index("00").build();
-    DBContainer EXTDSV = EXTDSV_query.getContainer();
-    EXTDSV.set("EXCONO", inCONO);
-    EXTDSV.set("EXCUDT", inCUDT);
-    EXTDSV.set("EXFACI", inFACI);
-    EXTDSV.set("EXSDST", inSDST);
-    EXTDSV.set("EXCUNO", inCUNO);
-    EXTDSV.set("EXITNO", inITNO);
+    DBAction queryEXTDSV = database.table("EXTDSV").index("00").build();
+    DBContainer containerEXTDSV = queryEXTDSV.getContainer();
+    containerEXTDSV.set("EXCONO", inCONO);
+    containerEXTDSV.set("EXCUDT", inCUDT);
+    containerEXTDSV.set("EXFACI", inFACI);
+    containerEXTDSV.set("EXSDST", inSDST);
+    containerEXTDSV.set("EXCUNO", inCUNO);
+    containerEXTDSV.set("EXITNO", inITNO);
 
-    if (!EXTDSV_query.read(EXTDSV)) {
+    if (!queryEXTDSV.read(containerEXTDSV)) {
       mi.error("Record does not exist");
       return;
     }
@@ -59,7 +60,7 @@ public class UpdEXTDSV extends ExtendM3Transaction {
     int changedDate = dateTime.format(DateTimeFormatter.ofPattern("yyyyMMdd")).toInteger();
     int changedTime = dateTime.format(DateTimeFormatter.ofPattern("HHmmss")).toInteger();
 
-    EXTDSV_query.readLock(EXTDSV, { LockedResult lockedResult ->
+    queryEXTDSV.readLock(containerEXTDSV, { LockedResult lockedResult ->
       if (!inORQT.isBlank()) {
         lockedResult.set("EXORQT", inORQT.equals("?") ? 0 : inORQT as double);
       }

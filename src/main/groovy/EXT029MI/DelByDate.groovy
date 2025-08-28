@@ -6,6 +6,7 @@
  * @CHANGELOGS
  *  Version   Date      User    Description
  *  1.0.0     20250604  ADY     Initial Release
+ *  1.0.1     20250826  ADY     Added Javadoc comments, fixed variable names, set nbrOfKeys to 1
  *
  */
 
@@ -45,13 +46,14 @@ public class DelByDate extends ExtendM3Transaction {
       exp = exp.and(exp.lt("EXCUDT", inCUDT));
     }
     
-    DBAction EXTDSV_query = database.table("EXTDSV")
+    DBAction queryEXTDSV = database.table("EXTDSV")
         .index("00")
         .matching(exp)
         .selection()
         .build();
 
-    DBContainer EXTDSV = EXTDSV_query.getContainer();
+    DBContainer containerEXTDSV = queryEXTDSV.getContainer();
+    containerEXTDSV.set("EXCONO", inCONO);
     
     Closure<?> resultHandlerEXTDSV = { DBContainer data ->
       DBAction action = database.table("EXTDSV").index("00").build();
@@ -60,12 +62,15 @@ public class DelByDate extends ExtendM3Transaction {
       });
     }
     
-    if (EXTDSV_query.readAll(EXTDSV, 0, pageSize, resultHandlerEXTDSV) <= 0) {
+    if (queryEXTDSV.readAll(containerEXTDSV, 1, pageSize, resultHandlerEXTDSV) <= 0) {
       mi.error("No valid record found - EXTDSV");
       return;
     }
   }
   
+  /**
+   * Validate input fields
+   */
   boolean isValidInput() {
     if (inCUDT.isBlank()) {
       mi.error("CUDT is required.");

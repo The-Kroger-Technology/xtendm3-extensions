@@ -4,14 +4,14 @@
  * @Authors: Ajian Dy
  *
  * @CHANGELOGS
- *  Version   Date     User     Description
- *  1.0.0     20250604 ADY      Initial Release
+ *  Version   Date      User    Description
+ *  1.0.0     20250604  ADY     Initial Release
+ *  1.0.1     20250826  ADY     Added Javadoc comments, fixed variable names, removed query for SDST, removed SimpleDateFormat
  *
  */
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.text.SimpleDateFormat;
 
 public class AddEXTDSV extends ExtendM3Transaction {
   private final MIAPI mi;
@@ -47,16 +47,16 @@ public class AddEXTDSV extends ExtendM3Transaction {
       return;
     }
     
-    DBAction EXTDSV_query = database.table("EXTDSV").index("00").build();
-    DBContainer EXTDSV = EXTDSV_query.getContainer();
-    EXTDSV.set("EXCONO", inCONO);
-    EXTDSV.set("EXCUDT", inCUDT);
-    EXTDSV.set("EXFACI", inFACI);
-    EXTDSV.set("EXSDST", inSDST);
-    EXTDSV.set("EXCUNO", inCUNO);
-    EXTDSV.set("EXITNO", inITNO);
+    DBAction queryEXTDSV = database.table("EXTDSV").index("00").build();
+    DBContainer containerEXTDSV = queryEXTDSV.getContainer();
+    containerEXTDSV.set("EXCONO", inCONO);
+    containerEXTDSV.set("EXCUDT", inCUDT);
+    containerEXTDSV.set("EXFACI", inFACI);
+    containerEXTDSV.set("EXSDST", inSDST);
+    containerEXTDSV.set("EXCUNO", inCUNO);
+    containerEXTDSV.set("EXITNO", inITNO);
     
-    if (EXTDSV_query.read(EXTDSV)) {
+    if (queryEXTDSV.read(containerEXTDSV)) {
       mi.error("Record already exists");
       return;
     }
@@ -71,17 +71,20 @@ public class AddEXTDSV extends ExtendM3Transaction {
     inLMDT = entryDate;
     inLMTM = entryTime;
 
-    EXTDSV.set("EXORQT", inORQT);
-    EXTDSV.set("EXCHID", inCHID);
-    EXTDSV.set("EXCHNO", inCHNO);
-    EXTDSV.set("EXRGDT", inRGDT);
-    EXTDSV.set("EXRGTM", inRGTM);
-    EXTDSV.set("EXLMDT", inLMDT);
-    EXTDSV.set("EXLMTM", inLMTM);
+    containerEXTDSV.set("EXORQT", inORQT);
+    containerEXTDSV.set("EXCHID", inCHID);
+    containerEXTDSV.set("EXCHNO", inCHNO);
+    containerEXTDSV.set("EXRGDT", inRGDT);
+    containerEXTDSV.set("EXRGTM", inRGTM);
+    containerEXTDSV.set("EXLMDT", inLMDT);
+    containerEXTDSV.set("EXLMTM", inLMTM);
 
-    EXTDSV_query.insert(EXTDSV);
+    queryEXTDSV.insert(containerEXTDSV);
   }
 
+  /**
+   * Validate input fields
+   */
   boolean isValidInput() {
     //Check CUDT
     if (inCUDT != 0) {
@@ -129,12 +132,12 @@ public class AddEXTDSV extends ExtendM3Transaction {
    * Validate FACI from CFACIL
    */
   boolean checkFACI() {
-    DBAction CFACIL_query = database.table("CFACIL").index("00").build();
-    DBContainer CFACIL = CFACIL_query.getContainer();
-    CFACIL.set("CFCONO", inCONO);
-    CFACIL.set("CFFACI", inFACI);
+    DBAction queryCFACIL = database.table("CFACIL").index("00").build();
+    DBContainer containerCFACIL = queryCFACIL.getContainer();
+    containerCFACIL.set("CFCONO", inCONO);
+    containerCFACIL.set("CFFACI", inFACI);
   
-    if (!CFACIL_query.read(CFACIL)) {
+    if (!queryCFACIL.read(containerCFACIL)) {
       return false;
     } else {
       return true;
@@ -145,15 +148,15 @@ public class AddEXTDSV extends ExtendM3Transaction {
    * Validate SDST from CSYTAB
    */
   boolean checkSDST() {
-    DBAction CSYTAB_query = database.table("CSYTAB").index("00").build();
-    DBContainer CSYTAB = CSYTAB_query.getContainer();
-    CSYTAB.set("CTCONO", inCONO);
-    CSYTAB.set("CTDIVI", "");
-    CSYTAB.set("CTSTCO", "SDST");
-    CSYTAB.set("CTSTKY", inSDST);
-    CSYTAB.set("CTLNCD", "");
+    DBAction queryCSYTAB = database.table("CSYTAB").index("00").build();
+    DBContainer containerCSYTAB = queryCSYTAB.getContainer();
+    containerCSYTAB.set("CTCONO", inCONO);
+    containerCSYTAB.set("CTDIVI", "");
+    containerCSYTAB.set("CTSTCO", "SDST");
+    containerCSYTAB.set("CTSTKY", inSDST);
+    containerCSYTAB.set("CTLNCD", "");
     
-    if (!CSYTAB_query.read(CSYTAB)) {
+    if (!queryCSYTAB.read(containerCSYTAB)) {
       return false;
     } else {
       return true;
@@ -164,25 +167,21 @@ public class AddEXTDSV extends ExtendM3Transaction {
    * Validate CUNO from OCUSMA
    */
   boolean checkCUNO() {
-    DBAction OCUSMA_query = database.table("OCUSMA").index("00").build();
-    DBContainer OCUSMA = OCUSMA_query.getContainer();
-    OCUSMA.set("OKCONO", inCONO);
-    OCUSMA.set("OKCUNO", inCUNO);
+    DBAction queryOCUSMA = database.table("OCUSMA").index("00").selection("OKSDST").build();
+    DBContainer containerOCUSMA = queryOCUSMA.getContainer();
+    containerOCUSMA.set("OKCONO", inCONO);
+    containerOCUSMA.set("OKCUNO", inCUNO);
   
-    if (!OCUSMA_query.read(OCUSMA)) {
+    if (!queryOCUSMA.read(containerOCUSMA)) {
       mi.error("Customer ${inCUNO} does not exist");
       return false;
     } else {
       if (!inSDST.isBlank()) {
-        ExpressionFactory OCUSMA_exp = database.getExpressionFactory("OCUSMA");
-        OCUSMA_exp = OCUSMA_exp.eq("OKSDST", inSDST);
-        OCUSMA_query = database.table("OCUSMA").index("00").matching(OCUSMA_exp).build();
-      
-        if (!OCUSMA_query.read(OCUSMA)) {
+        if (inSDST != containerOCUSMA.get("OKSDST").toString()) {
           mi.error("Customer ${inCUNO} does not belong to District ${inSDST}");
           return false;
         } else {
-          return true; 
+          return true;
         }
       } else {
         return true;
@@ -194,16 +193,15 @@ public class AddEXTDSV extends ExtendM3Transaction {
    * Validate ITNO from MITMAS
    */
   boolean checkITNO() {
-    DBAction MITMAS_query = database.table("MITMAS").index("00").build();
-    DBContainer MITMAS = MITMAS_query.getContainer();
-    MITMAS.set("MMCONO", inCONO);
-    MITMAS.set("MMITNO", inITNO);
+    DBAction queryMITMAS = database.table("MITMAS").index("00").build();
+    DBContainer containerMITMAS = queryMITMAS.getContainer();
+    containerMITMAS.set("MMCONO", inCONO);
+    containerMITMAS.set("MMITNO", inITNO);
   
-    if (!MITMAS_query.read(MITMAS)) {
+    if (!queryMITMAS.read(containerMITMAS)) {
       return false;
     } else {
       return true;
     }
   }
-
 }
