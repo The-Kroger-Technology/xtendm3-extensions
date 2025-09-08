@@ -7,6 +7,7 @@
  *  Version   Date      User    Description
  *  1.0.0     20250604  ADY     Initial Release
  *  1.0.1     20250826  ADY     Fixed variable names
+ *  1.0.2     20250904  ADY     Added input FACI
  *
  */
 
@@ -19,7 +20,7 @@ public class DelEXTSGD extends ExtendM3Transaction {
   private final DatabaseAPI database;
   
   private int inCONO;
-  private String inSDST, inSTRG, inCUNO;
+  private String inFACI, inSDST, inSTRG, inCUNO;
 
   public DelEXTSGD(MIAPI mi, UtilityAPI utility, LoggerAPI logger, ProgramAPI program, MICallerAPI miCaller, DatabaseAPI database) {
     this.mi = mi;
@@ -32,6 +33,7 @@ public class DelEXTSGD extends ExtendM3Transaction {
   
   public void main() {
     inCONO = mi.in.get("CONO") == null ? program.LDAZD.CONO as int : mi.in.get("CONO") as int;
+    inFACI = mi.inData.get("FACI") == null ? "" : mi.inData.get("FACI").trim() as String;
     inSDST = mi.inData.get("SDST") == null ? "" : mi.inData.get("SDST").trim() as String;
     inSTRG = mi.inData.get("STRG") == null ? "" : mi.inData.get("STRG").trim() as String;
     inCUNO = mi.inData.get("CUNO") == null ? "" : mi.inData.get("CUNO").trim() as String;
@@ -39,6 +41,7 @@ public class DelEXTSGD extends ExtendM3Transaction {
     DBAction queryEXTSGD = database.table("EXTSGD").index("00").build();
     DBContainer containerEXTSGD = queryEXTSGD.getContainer();
     containerEXTSGD.set("EXCONO", inCONO);
+    containerEXTSGD.set("EXFACI", inFACI);
     containerEXTSGD.set("EXSDST", inSDST);
     containerEXTSGD.set("EXSTRG", inSTRG);
     containerEXTSGD.set("EXCUNO", inCUNO);
