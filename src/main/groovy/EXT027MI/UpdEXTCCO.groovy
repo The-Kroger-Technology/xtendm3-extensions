@@ -157,7 +157,7 @@ public class UpdEXTCCO extends ExtendM3Transaction {
    * Validate DLIX from MHDISH
    */
   boolean checkMHDISH() {
-    DBAction query = database.table("MHDISH").index("00").selectAllFields().build();
+    DBAction query = database.table("MHDISH").index("00").build();
     DBContainer container = query.getContainer();
     container.set("OQCONO", inCONO);
     container.set("OQINOU", Integer.parseInt(inINOU));
@@ -169,7 +169,7 @@ public class UpdEXTCCO extends ExtendM3Transaction {
    * Validate ORNO from OOHEAD
    */
   boolean checkOOHEAD() {
-    DBAction query = database.table("OOHEAD").index("00").selectAllFields().build();
+    DBAction query = database.table("OOHEAD").index("00").build();
     DBContainer container = query.getContainer();
     container.set("OACONO", inCONO);
     container.set("OAORNO", inORNO);
