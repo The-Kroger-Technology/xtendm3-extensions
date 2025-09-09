@@ -4,10 +4,10 @@
  * @Authors: Job Hanrhee Cuta
  *
  * @CHANGELOGS
- *  Version   Date     User     Description
- *  1.0.0     YYMMdd   User     Initial Release - Generated from XtendM3 CRUD Generator
- *  1.1.0     250618   JHC      Added fields DIST, STOR, PRDY, PRTM
- *
+ *  Version   Date     User       Description
+ *  1.0.0     YYMMdd   User       Initial Release - Generated from XtendM3 CRUD Generator
+ *  1.1.0     250618   JHC        Added fields DIST, STOR, PRDY, PRTM
+ *  1.1.1     250904   JTAPANG    Add Comments, Description, change cast from int to long, remove unnecessary code.   
  */
 
 import java.time.LocalDateTime;
@@ -28,7 +28,7 @@ public class UpdEXTCCO extends ExtendM3Transaction {
   private String inDIVI;
   private String inDLIX;
   private String inINOU;
-  private String inUCA8;
+  private String inBAID;
   private String inDIST;
   private String inSTOR;
   private String inPRDY;
@@ -52,20 +52,20 @@ public class UpdEXTCCO extends ExtendM3Transaction {
     inDIVI = mi.inData.get("DIVI") == null ? "" : mi.inData.get("DIVI").trim();
     inDLIX = mi.inData.get("DLIX") == null ? "" : mi.inData.get("DLIX").trim();
     inINOU = mi.inData.get("INOU") == null ? "" : mi.inData.get("INOU").trim();
-    inUCA8 = mi.inData.get("UCA8") == null ? "" : mi.inData.get("UCA8").trim();
+    inBAID = mi.inData.get("BAID") == null ? "" : mi.inData.get("BAID").trim();
     inDIST = mi.inData.get("DIST") == null ? "" : mi.inData.get("DIST").trim();
-    inSTOR = mi.inData.get("STOR") == null ? "0" : mi.inData.get("STOR").trim();
-    inPRDY = mi.inData.get("PRDY") == null ? "0" : mi.inData.get("PRDY").trim();
+    inSTOR = mi.inData.get("STOR") == null ? "" : mi.inData.get("STOR").trim();
+    inPRDY = mi.inData.get("PRDY") == null ? "" : mi.inData.get("PRDY").trim();
     inPRTM = mi.inData.get("PRTM") == null ? "" : mi.inData.get("PRTM").trim();
     inORNO = mi.inData.get("ORNO") == null ? "" : mi.inData.get("ORNO").trim();
     inROUT = mi.inData.get("ROUT") == null ? "" : mi.inData.get("ROUT").trim();
     inLINB = mi.inData.get("LINB") == null ? "" : mi.inData.get("LINB").trim();
     inDSDT = mi.inData.get("DSDT") == null ? "" : mi.inData.get("DSDT").trim();
     
-    DBAction query = database.table("EXTCCO").index("00").selectAllFields().build();
+    DBAction query = database.table("EXTCCO").index("00").build();
     DBContainer container = query.getContainer();
     container.set("EXCONO", inCONO);
-    container.set("EXDLIX", inDLIX as int);
+    container.set("EXDLIX", inDLIX as long);
     container.set("EXINOU", inINOU as int);
 
     if (!query.read(container)) {
@@ -86,8 +86,8 @@ public class UpdEXTCCO extends ExtendM3Transaction {
       if (!inDIVI.isBlank()) {
         lockedResult.set("EXDIVI", inDIVI.equals("?") ? "" : inDIVI);
       }
-      if (!inUCA8.isBlank()) {
-        lockedResult.set("EXUCA8", inUCA8.equals("?") ? "" : inUCA8);
+      if (!inBAID.isBlank()) {
+        lockedResult.set("EXBAID", inBAID.equals("?") ? "" : inBAID);
       }
       if (!inDIST.isBlank()) {
         lockedResult.set("EXDIST", inDIST.equals("?") ? "" : inDIST);
@@ -123,7 +123,10 @@ public class UpdEXTCCO extends ExtendM3Transaction {
       lockedResult.update();
     });
   }
-
+  
+  /**
+   * Validate input fields
+   */
   boolean isValidInput() {
     // Check MHDISH
     if (!checkMHDISH()) {
@@ -150,6 +153,9 @@ public class UpdEXTCCO extends ExtendM3Transaction {
     return true;
   }
   
+  /**
+   * Validate DLIX from MHDISH
+   */
   boolean checkMHDISH() {
     DBAction query = database.table("MHDISH").index("00").selectAllFields().build();
     DBContainer container = query.getContainer();
@@ -159,6 +165,9 @@ public class UpdEXTCCO extends ExtendM3Transaction {
     return query.read(container);
   }
   
+  /**
+   * Validate ORNO from OOHEAD
+   */
   boolean checkOOHEAD() {
     DBAction query = database.table("OOHEAD").index("00").selectAllFields().build();
     DBContainer container = query.getContainer();
@@ -167,6 +176,9 @@ public class UpdEXTCCO extends ExtendM3Transaction {
     return query.read(container);
   }
   
+  /**
+   * Check DSDT
+   */
   boolean checkDSDT() {
     return utility.call("DateUtil", "isDateValid", inDSDT, "yyyyMMdd");
   }

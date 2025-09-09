@@ -4,11 +4,12 @@
  * @Authors: Job Hanrhee Cuta
  *
  * @CHANGELOGS
- *  Version   Date     User     Description
- *  1.0.0     YYddMM   User     Initial Release - Generated from XtendM3 CRUD Generator
- *  1.1.0     250618   JHC      Added fields DIST, STOR, PRDY, PRTM
- *
+ *  Version   Date     User       Description
+ *  1.0.0     YYddMM   User       Initial Release - Generated from XtendM3 CRUD Generator
+ *  1.1.0     250618   JHC        Added fields DIST, STOR, PRDY, PRTM
+ *  1.1.1     250904   JTAPANG    Add Comments, Description, change cast from int to long, remove unnecessary code.   
  */
+ 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 public class DelEXTCCO extends ExtendM3Transaction {
@@ -18,6 +19,7 @@ public class DelEXTCCO extends ExtendM3Transaction {
   private final ProgramAPI program;
   private final MICallerAPI miCaller;
   private final DatabaseAPI database;
+  
   private int inCONO;
   private String inDIVI;
   private String inDLIX;
@@ -37,11 +39,12 @@ public class DelEXTCCO extends ExtendM3Transaction {
     inDLIX = mi.inData.get("DLIX") == null ? "" : mi.inData.get("DLIX").trim();
     inINOU = mi.inData.get("INOU") == null ? "" : mi.inData.get("INOU").trim();
     
-    DBAction query = database.table("EXTCCO").index("00").selectAllFields().build();
+    DBAction query = database.table("EXTCCO").index("00").build();
     DBContainer container = query.getContainer();
     container.set("EXCONO", inCONO);
-    container.set("EXDLIX", inDLIX as int);
+    container.set("EXDLIX", inDLIX as long);
     container.set("EXINOU", inINOU as int);
+    
     if (!query.read(container)) {
       mi.error("Record does not exists");
       return;
@@ -50,5 +53,6 @@ public class DelEXTCCO extends ExtendM3Transaction {
       LockedResult lockedResult ->
       lockedResult.delete();
     });
+    
   }
 }
