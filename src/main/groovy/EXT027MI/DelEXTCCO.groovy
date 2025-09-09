@@ -44,15 +44,13 @@ public class DelEXTCCO extends ExtendM3Transaction {
     container.set("EXCONO", inCONO);
     container.set("EXDLIX", inDLIX as long);
     container.set("EXINOU", inINOU as int);
-    
-    if (!query.read(container)) {
-      mi.error("Record does not exists");
-      return;
-    }
-    query.readLock(container, {
-      LockedResult lockedResult ->
+
+    if (!query.readLock(container, { LockedResult lockedResult ->
       lockedResult.delete();
-    });
+    })) {
+      mi.error("Record does not exist");
+        return;
+      }
     
   }
 }
