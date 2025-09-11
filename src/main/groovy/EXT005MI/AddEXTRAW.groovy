@@ -7,6 +7,7 @@
  *  Version   Date      User    Description
  *  1.0.0     20250324  ADY     Initial Release
  *  1.0.1     20250826  ADY     Added Javadoc comments, fixed variable names, removed SimpleDateFormat
+ *  1.0.2     20250903  ADY     Added input MFNO
  *
  */
 
@@ -23,7 +24,7 @@ public class AddEXTRAW extends ExtendM3Transaction {
   private final DatabaseAPI database;
 
   private int inCONO, inFDAT, inTDAT, inCHNO, inRGDT, inRGTM, inLMDT, inLMTM;
-  private String inFACI, inMTNO, inITNO, inITCL, inCHID;
+  private String inFACI, inMTNO, inITNO, inMFNO, inITCL, inCHID;
   private double inTRQT, inTAMT, inPCTG;
 
   public AddEXTRAW(MIAPI mi, UtilityAPI utility, LoggerAPI logger, ProgramAPI program, MICallerAPI miCaller, DatabaseAPI database) {
@@ -40,6 +41,7 @@ public class AddEXTRAW extends ExtendM3Transaction {
     inFACI = mi.inData.get("FACI") == null ? "" : mi.inData.get("FACI").trim() as String;
     inMTNO = mi.inData.get("MTNO") == null ? "" : mi.inData.get("MTNO").trim() as String;
     inITNO = mi.inData.get("ITNO") == null ? "" : mi.inData.get("ITNO").trim() as String;
+    inMFNO = mi.inData.get("MFNO") == null ? "" : mi.inData.get("MFNO").trim() as String;
     inITCL = mi.inData.get("ITCL") == null ? "" : mi.inData.get("ITCL").trim() as String;
     inFDAT = mi.inData.get("FDAT") == null ? 0 : mi.inData.get("FDAT").trim() as int;
     inTDAT = mi.inData.get("TDAT") == null ? 0 : mi.inData.get("TDAT").trim() as int;
@@ -57,6 +59,7 @@ public class AddEXTRAW extends ExtendM3Transaction {
     containerEXTRAW.set("EXFACI", inFACI);
     containerEXTRAW.set("EXMTNO", inMTNO);
     containerEXTRAW.set("EXITNO", inITNO);
+    containerEXTRAW.set("EXMFNO", inMFNO);
     containerEXTRAW.set("EXITCL", inITCL);
     containerEXTRAW.set("EXFDAT", inFDAT);
     containerEXTRAW.set("EXTDAT", inTDAT);
@@ -146,6 +149,14 @@ public class AddEXTRAW extends ExtendM3Transaction {
       }
     }
     
+    // Check MFNO
+    if (!inMFNO.isBlank()) {
+      if (!this.checkMFNO()) {
+        mi.error("Manufacturing order number ${inMFNO} does not exist");
+        return false;
+      }
+    }
+    
     // Check ITCL
     if (!inITCL.isBlank()) {
       if (!this.checkITCL()) {
@@ -183,6 +194,24 @@ public class AddEXTRAW extends ExtendM3Transaction {
     containerMITMAS.set("MMITNO", itno);
   
     if (!queryMITMAS.read(containerMITMAS)) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+  
+  /**
+   * Validate MFNO from MWOHED
+   */
+  boolean checkMFNO() {
+    ExpressionFactory expMWOHED = database.getExpressionFactory("MWOHED");
+    expMWOHED = expMWOHED.eq("VHMFNO", inMFNO);
+    
+    DBAction queryMWOHED = database.table("MWOHED").index("00").matching(expMWOHED).build();
+    DBContainer containerMWOHED = queryMWOHED.getContainer();
+    containerMWOHED.set("VHCONO", inCONO);
+    
+    if (queryMWOHED.readAll(containerMWOHED, 1, 1, {}) <= 0) {
       return false;
     } else {
       return true;

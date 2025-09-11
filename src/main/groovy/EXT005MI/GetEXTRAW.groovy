@@ -7,6 +7,7 @@
  *  Version   Date      User    Description
  *  1.0.0     20250325  ADY     Initial Release
  *  1.0.1     20250826  ADY     Fixed variable names
+ *  1.0.2     20250903  ADY     Added input and output MFNO
  *
  */
 
@@ -19,7 +20,7 @@ public class GetEXTRAW extends ExtendM3Transaction {
   private final DatabaseAPI database;
   
   private int inCONO;
-  private String inFACI, inMTNO, inITNO, inITCL, inFDAT, inTDAT;
+  private String inFACI, inMTNO, inITNO, inMFNO, inITCL, inFDAT, inTDAT;
   
   public GetEXTRAW(MIAPI mi, UtilityAPI utility, LoggerAPI logger, ProgramAPI program, MICallerAPI miCaller, DatabaseAPI database) {
     this.mi = mi;
@@ -35,6 +36,7 @@ public class GetEXTRAW extends ExtendM3Transaction {
     inFACI = mi.inData.get("FACI") == null ? "" : mi.inData.get("FACI").trim() as String;
     inMTNO = mi.inData.get("MTNO") == null ? "" : mi.inData.get("MTNO").trim() as String;
     inITNO = mi.inData.get("ITNO") == null ? "" : mi.inData.get("ITNO").trim() as String;
+    inMFNO = mi.inData.get("MFNO") == null ? "" : mi.inData.get("MFNO").trim() as String;
     inITCL = mi.inData.get("ITCL") == null ? "" : mi.inData.get("ITCL").trim() as String;
     inFDAT = mi.inData.get("FDAT") == null ? "" : mi.inData.get("FDAT").trim() as String;
     inTDAT = mi.inData.get("TDAT") == null ? "" : mi.inData.get("TDAT").trim() as String;
@@ -45,6 +47,7 @@ public class GetEXTRAW extends ExtendM3Transaction {
     containerEXTRAW.set("EXFACI", inFACI);
     containerEXTRAW.set("EXMTNO", inMTNO);
     containerEXTRAW.set("EXITNO", inITNO);
+    containerEXTRAW.set("EXMFNO", inMFNO);
     containerEXTRAW.set("EXITCL", inITCL);
     containerEXTRAW.set("EXFDAT", inFDAT as int);
     containerEXTRAW.set("EXTDAT", inTDAT as int);
@@ -54,6 +57,7 @@ public class GetEXTRAW extends ExtendM3Transaction {
       mi.outData.put("FACI", containerEXTRAW.get("EXFACI").toString());
       mi.outData.put("MTNO", containerEXTRAW.get("EXMTNO").toString());
       mi.outData.put("ITNO", containerEXTRAW.get("EXITNO").toString());
+      mi.outData.put("MFNO", containerEXTRAW.get("EXMFNO").toString());
       mi.outData.put("ITCL", containerEXTRAW.get("EXITCL").toString());
       mi.outData.put("FDAT", containerEXTRAW.get("EXFDAT").toString());
       mi.outData.put("TDAT", containerEXTRAW.get("EXTDAT").toString());
