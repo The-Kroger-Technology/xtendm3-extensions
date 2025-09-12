@@ -4,9 +4,9 @@
  * @Authors:  Jonard Tapang`
  *
  * @CHANGELOGS
- *  Version   Date     User     Description
- *  1.0.0     YYddMM   User     Initial Release - Generated from XtendM3 CRUD Generator
- *
+ *  Version   Date        User        Description
+ *  1.0.0     20250818    JTAPANG     Initial Release - Generated from XtendM3 CRUD Generator. Add modifications
+ *  1.1.0     20250911    JTAPANG     Add XtendM3 review comments.(Standard field validations, handling numeric exception, remove unused codes, Fix naming and variables)
  */
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -37,10 +37,10 @@ public class DelEXTCCL extends ExtendM3Transaction {
     inDLIX = mi.inData.get("DLIX") == null ? "" : mi.inData.get("DLIX").trim();
     inINOU = mi.inData.get("INOU") == null ? "" : mi.inData.get("INOU").trim();
     
-    DBAction query = database.table("EXTCCL").index("10").selectAllFields().build();
+    DBAction query = database.table("EXTCCL").index("10").build();
     DBContainer container = query.getContainer();
     container.set("EXCONO", inCONO);
-    container.set("EXDLIX", inDLIX as int);
+    container.set("EXDLIX", inDLIX as long);
     container.set("EXINOU", inINOU as int);
     int nrOfRecords = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 10000? 10000: mi.getMaxRecords();
     int nrOfKeys = 3;
@@ -62,7 +62,4 @@ public class DelEXTCCL extends ExtendM3Transaction {
 
   }
   
-  Closure<?> deleterCallback = { LockedResult lockedResult ->
-    lockedResult.delete();
-  }
 }

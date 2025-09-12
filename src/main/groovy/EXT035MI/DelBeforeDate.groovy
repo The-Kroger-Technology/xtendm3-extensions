@@ -6,8 +6,11 @@
  * @CHANGELOGS
  *  Version   Date      User    	Description
  *  1.0.0     20250902  JTAPANG     Initial Release
- *
+ *  1.1.0     20250911  JTAPANG     Add XtendM3 review comments.(Standard field validations, handling numeric exception, remove unused codes, Fix naming and variables)
  */
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class DelBeforeDate extends ExtendM3Transaction {
   private final MIAPI mi;
@@ -31,21 +34,19 @@ public class DelBeforeDate extends ExtendM3Transaction {
   
   public void main() {
     inCONO = mi.in.get("CONO") == null ? program.LDAZD.CONO as int : mi.in.get("CONO") as int;
-    inRGDT = mi.inData.get("RGDT") == null ? "" : mi.inData.get("RGDT").trim() as String;
+    inRGDT = LocalDateTime.now().format(DateTimeFormatter.ofPattern('yyyyMMdd'));
     maxRecords = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 10000 ? 10000: mi.getMaxRecords();
-    
     if (!isValidInput()) {
       return;
     }
     
     ExpressionFactory exp = database.getExpressionFactory("EXTCCL");
-    exp = exp.eq("EXCONO", inCONO.toString());
     
     if (!inRGDT.isBlank()) {
-      exp = exp.and(exp.le("EXRGDT", inRGDT));
+      exp = exp.le("EXRGDT", inRGDT);
     }
     
-    DBAction queryEXTCCL = database.table("EXTCCL").index("00").matching(exp).selection().build();
+    DBAction queryEXTCCL = database.table("EXTCCL").index("00").matching(exp).build();
         
     DBContainer containerEXTCCL = queryEXTCCL.getContainer();
     containerEXTCCL.set("EXCONO", inCONO);

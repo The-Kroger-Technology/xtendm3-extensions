@@ -4,9 +4,9 @@
  * @Authors:  Jonard Tapang
  *
  * @CHANGELOGS
- *  Version   Date     User     Description
- *  1.0.0     YYddMM   User     Initial Release - Generated from XtendM3 CRUD Generator
- *
+ *  Version   Date        User        Description
+ *  1.0.0     20250818    JTAPANG     Initial Release - Generated from XtendM3 CRUD Generator. Add modifications
+ *  1.1.0     20250911    JTAPANG     Add XtendM3 review comments.(Standard field validations, handling numeric exception, remove unused codes, Fix naming and variables)
  */
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -41,7 +41,7 @@ public class GetEXTCCL extends ExtendM3Transaction {
     DBContainer container = query.getContainer();
     container.set("EXCONO", inCONO);
     container.set("EXLINE", inLINE as int);
-    container.set("EXDLIX", inDLIX as int);
+    container.set("EXDLIX", inDLIX as long);
     container.set("EXINOU", inINOU as int);
     
     if (!query.read(container)) {
