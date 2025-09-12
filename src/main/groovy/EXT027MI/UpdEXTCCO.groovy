@@ -161,7 +161,7 @@ public class UpdEXTCCO extends ExtendM3Transaction {
     DBContainer container = query.getContainer();
     container.set("OQCONO", inCONO);
     container.set("OQINOU", Integer.parseInt(inINOU));
-    container.set("OQDLIX", Integer.parseInt(inDLIX));
+    container.set("OQDLIX", Long.parseLong(inDLIX));
     return query.read(container);
   }
   

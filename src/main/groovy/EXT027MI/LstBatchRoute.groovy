@@ -28,6 +28,7 @@ public class LstBatchRoute extends ExtendM3Transaction {
   private String inORNO;
   private String inROUT;
   private String inLINB;
+  final int MAX_RECORDS = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 10000 ? 10000: mi.getMaxRecords();
   
   public LstBatchRoute(MIAPI mi, UtilityAPI utility, LoggerAPI logger, ProgramAPI program, MICallerAPI miCaller, DatabaseAPI database) {
     this.mi = mi;
@@ -139,7 +140,7 @@ public class LstBatchRoute extends ExtendM3Transaction {
       index++;
     }
     
-    query.readAll(container, indexCount, 10000, {
+    query.readAll(container, indexCount, MAX_RECORDS, {
       DBContainer data ->
       mi.outData.put("CONO", data.get("EXCONO").toString());
       mi.outData.put("DIVI", data.get("EXDIVI").toString());

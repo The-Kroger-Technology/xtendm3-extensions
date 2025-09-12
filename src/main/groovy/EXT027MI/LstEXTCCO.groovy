@@ -22,6 +22,7 @@ public class LstEXTCCO extends ExtendM3Transaction {
   private int inCONO;
   private String inDLIX;
   private String inINOU;
+  final int MAX_RECORDS = mi.getMaxRecords() <= 0 || mi.getMaxRecords() >= 10000 ? 10000: mi.getMaxRecords();
   
   public LstEXTCCO(MIAPI mi, UtilityAPI utility, LoggerAPI logger, ProgramAPI program, MICallerAPI miCaller, DatabaseAPI database) {
     this.mi = mi;
@@ -48,7 +49,7 @@ public class LstEXTCCO extends ExtendM3Transaction {
       container.set("EXINOU", inINOU as int);
       index++;
     }
-    query.readAll(container, index, 10000, {
+    query.readAll(container, index, MAX_RECORDS, {
       DBContainer data ->
       mi.outData.put("CONO", data.get("EXCONO").toString());
       mi.outData.put("DIVI", data.get("EXDIVI").toString());

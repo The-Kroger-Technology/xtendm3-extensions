@@ -75,11 +75,6 @@ public class AddEXTCCO extends ExtendM3Transaction {
     container.set("EXDLIX", inDLIX as long);
     container.set("EXINOU", inINOU as int);
 
-    if (query.read(container)) {
-      mi.error("Record already exists");
-      return;
-    }
-
     if (!isValidInput()) {
       return;
     }
@@ -111,7 +106,10 @@ public class AddEXTCCO extends ExtendM3Transaction {
     container.set("EXLMDT", inLMDT);
     container.set("EXLMTM", inLMTM);
 
-    query.insert(container);
+    if(!query.insert(container)){
+      mi.error("Record already exists");
+      return;
+    }
   }
   
   /**
@@ -147,11 +145,11 @@ public class AddEXTCCO extends ExtendM3Transaction {
    * Validate DLIX from MHDISH
    */
   boolean checkMHDISH() {
-    DBAction query = database.table("MHDISH").index("00").selectAllFields().build();
+    DBAction query = database.table("MHDISH").index("00").build();
     DBContainer container = query.getContainer();
     container.set("OQCONO", inCONO);
     container.set("OQINOU", Integer.parseInt(inINOU));
-    container.set("OQDLIX", Integer.parseInt(inDLIX));
+    container.set("OQDLIX", Long.parseLong(inDLIX));
     return query.read(container);
   }
   
@@ -159,7 +157,7 @@ public class AddEXTCCO extends ExtendM3Transaction {
    * Validate ORNO from OOHEAD
    */
   boolean checkOOHEAD() {
-    DBAction query = database.table("OOHEAD").index("00").selectAllFields().build();
+    DBAction query = database.table("OOHEAD").index("00").build();
     DBContainer container = query.getContainer();
     container.set("OACONO", inCONO);
     container.set("OAORNO", inORNO);
