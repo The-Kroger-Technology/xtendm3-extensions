@@ -8,6 +8,7 @@
  *  1.0.0     20250324  ADY     Initial Release
  *  1.0.1     20250826  ADY     Added Javadoc comments, fixed variable names, removed SimpleDateFormat
  *  1.0.2     20250903  ADY     Added input MFNO
+ *  1.0.3     20250912  ADY     Used index 56 of MWOHED
  *
  */
 
@@ -204,14 +205,12 @@ public class AddEXTRAW extends ExtendM3Transaction {
    * Validate MFNO from MWOHED
    */
   boolean checkMFNO() {
-    ExpressionFactory expMWOHED = database.getExpressionFactory("MWOHED");
-    expMWOHED = expMWOHED.eq("VHMFNO", inMFNO);
-    
-    DBAction queryMWOHED = database.table("MWOHED").index("00").matching(expMWOHED).build();
+    DBAction queryMWOHED = database.table("MWOHED").index("56").build();
     DBContainer containerMWOHED = queryMWOHED.getContainer();
     containerMWOHED.set("VHCONO", inCONO);
+    containerMWOHED.set("VHMFNO", inMFNO)
     
-    if (queryMWOHED.readAll(containerMWOHED, 1, 1, {}) <= 0) {
+    if (queryMWOHED.readAll(containerMWOHED, 2, 1, {}) <= 0) {
       return false;
     } else {
       return true;
